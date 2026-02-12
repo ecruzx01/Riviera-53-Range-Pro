@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#001f3f">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon.png">
+    
+    <title>Riviera 53 Range Pro</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #001f3f; padding: 15px; color: #333; margin: 0; }
+        .card { background: white; padding: 20px; border-radius: 25px; max-width: 480px; margin: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid #004080; }
+        h2 { color: #004080; text-align: center; margin: 0; font-size: 20px; text-transform: uppercase; }
+        .subtitle { text-align: center; font-size: 10px; color: #d9534f; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
+        
+        .input-group { background: #f1f5f9; padding: 10px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #cbd5e1; }
+        label { display: block; font-weight: bold; font-size: 10px; color: #1e293b; margin-bottom: 4px; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; border: 1px solid #94a3b8; border-radius: 8px; box-sizing: border-box; font-size: 18px; text-align: center; font-weight: bold; }
+
+        .engine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .engine-box { background: #f8fafc; padding: 12px; border-radius: 15px; border-top: 4px solid #004080; position: relative; }
+        .engine-label { display: block; font-weight: 900; font-size: 10px; color: #004080; margin-bottom: 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+        
+        #imbalanceAlert { display: none; background: #fff5f5; color: #c53030; font-size: 10px; font-weight: bold; text-align: center; padding: 8px; border-radius: 8px; border: 1px solid #feb2b2; margin-bottom: 10px; animation: blink 2s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        .range-box { background: #0f172a; color: white; padding: 20px; border-radius: 18px; text-align: center; margin-top: 10px; border: 2px solid #22c55e; }
+        .range-val { font-size: 48px; font-weight: 900; color: #22c55e; display: block; line-height: 1; }
+        .footer { font-size: 9px; color: #64748b; text-align: center; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Range Estimator Pro</h2>
+    <div class="subtitle">10% Safety Margin Applied</div>
+
+    <div id="imbalanceAlert">⚠️ ATENCIÓN: DESBALANCE DE CONSUMO (>10%)</div>
+
+    <div class="input-group" style="background: #e2e8f0;">
+        <label>Total Fuel on Board (Gal):</label>
+        <input type="number" id="fuel" placeholder="900" inputmode="decimal">
+    </div>
+
+    <div class="engine-grid">
+        <div class="engine-box">
+            <span class="engine-label">PORT (Master RPM)</span>
+            <label>RPM:</label>
+            <input type="number" id="rpmP" placeholder="0" inputmode="numeric">
+            <label style="margin-top:8px;">GPH:</label>
+            <input type="number" id="gphP" placeholder="0.0" step="0.1" inputmode="decimal">
+        </div>
+        
+        <div class="engine-box" style="border-top-color: #ef4444;">
+            <span class="engine-label">STBD (Indep. GPH)</span>
+            <label>RPM:</label>
+            <input type="number" id="rpmS" placeholder="0" inputmode="numeric">
+            <label style="margin-top:8px;">GPH:</label>
+            <input type="number" id="gphS" placeholder="0.0" step="0.1" inputmode="decimal">
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Current SOG (Knots):</label>
+        <input type="number" id="knots" placeholder="24.8" step="0.1" inputmode="decimal">
+    </div>
+
+    <div class="range-box">
+        <span style="font-size: 11px; font-weight: bold; opacity: 0.8;">SAFE NAUTICAL MILES</span>
+        <span id="resRange" class="range-val">0</span>
+        <div id="summary" style="font-size: 11px; margin-top:10px; color: #94a3b8; border-top: 1px solid #1e293b; padding-top:8px;">
+            Total Burn: 0.0 GPH | 0.00 NMPG
+        </div>
+    </div>
+
+    <div class="footer">
+        Reference: 51 GPH @ 2100 RPM (0.49 NMPG)<br>
+        RIY53032D415 Performance Reference
+    </div>
+</div>
+
+<script>
+    // Registro del Service Worker para permitir instalación
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then(() => console.log("SW OK"));
+    }
+
+    const fuelIn = document.getElementById('fuel');
+    const rpmPIn = document.getElementById('rpmP');
+    const rpmSIn = document.getElementById('rpmS');
+    const gphPIn = document.getElementById('gphP');
+    const gphSIn = document.getElementById('gphS');
+    const knotsIn = document.getElementById('knots');
+    const resOut = document.getElementById('resRange');
+    const sumOut = document.getElementById('summary');
+    const alertBox = document.getElementById('imbalanceAlert');
+
+    rpmPIn.addEventListener('input', () => {
+        rpmSIn.value = rpmPIn.value;
+        calculate();
+    });
+
+    [fuelIn, rpmSIn, gphPIn, gphSIn, knotsIn].forEach(el => {
+        el.addEventListener('input', calculate);
+    });
+
+    function calculate() {
+        const fuelTotal = parseFloat(fuelIn.value) || 0;
+        const gphP = parseFloat(gphPIn.value) || 0;
+        const gphS = parseFloat(gphSIn.value) || 0;
+        const knots = parseFloat(knotsIn.value) || 0;
+
+        if (gphP > 0 && gphS > 0) {
+            const diff = Math.abs(gphP - gphS);
+            const avg = (gphP + gphS) / 2;
+            alertBox.style.display = (diff / avg > 0.10) ? "block" : "none";
+        } else {
+            alertBox.style.display = "none";
+        }
+
+        const totalBurn = gphP + gphS;
+        const fuelSafe = fuelTotal * 0.90; // Reserva 10%
+
+        if (totalBurn > 0 && knots > 0 && fuelSafe > 0) {
+            const nmpg = knots / totalBurn;
+            const range = fuelSafe * nmpg;
+            resOut.innerText = Math.floor(range);
+            sumOut.innerText = `Total Burn: ${totalBurn.toFixed(1)} GPH | ${nmpg.toFixed(2)} NMPG`;
+            resOut.style.color = (nmpg < 0.48) ? "#f59e0b" : "#22c55e";
+        } else {
+            resOut.innerText = "0";
+            sumOut.innerText = "Total Burn: 0.0 GPH | 0.00 NMPG";
+        }
+    }
+</script>
+</body>
+</html>
