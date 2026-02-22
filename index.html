@@ -2,169 +2,123 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Edwin's Wallet</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>c.Reward Maximizer</title>
     <style>
-        body {
-            background-image: linear-gradient(to bottom, rgba(1, 4, 9, 0.4), rgba(1, 4, 9, 0.9)), url('wallet.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-color: #010409;
-        }
-        .glass-panel {
-            background: rgba(22, 27, 34, 0.85);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .card-face { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-        .tab-active { color: #3b82f6; border-bottom: 2px solid #3b82f6; }
-        * { -webkit-tap-highlight-color: transparent; }
+        :root { --primary: #0046be; --secondary: #e51937; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        h1 { color: var(--primary); text-align: center; margin-bottom: 25px; }
+        label { font-weight: bold; display: block; margin-bottom: 8px; }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ddd; margin-bottom: 20px; font-size: 16px; }
+        .result-box { padding: 20px; border-radius: 10px; display: none; margin-top: 10px; }
+        .winner { background: #e7f3ff; border-left: 5px solid var(--primary); margin-bottom: 15px; }
+        .runner-up { background: #fff5f6; border-left: 5px solid var(--secondary); }
+        .tag { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .tag-cash { background: #2ecc71; color: white; }
+        .tag-ins { background: #f39c12; color: white; }
+        .note { font-size: 14px; color: #555; margin-top: 5px; }
     </style>
 </head>
-<body class="text-gray-100 font-sans min-h-screen">
+<body>
 
-    <div class="max-w-md mx-auto p-6 min-h-screen flex flex-col">
-        <header class="text-center mt-6 mb-4">
-            <h1 class="text-3xl font-black text-blue-500 tracking-tighter uppercase italic">Edwin's Wallet</h1>
-            <p class="text-gray-400 text-[10px] font-bold tracking-[0.4em] mt-1 uppercase">Rewards Optimizer</p>
-        </header>
+<div class="card">
+    <h1>c.Reward Maximizer</h1>
+    
+    <label for="category">Select Spending Category:</label>
+    <select id="category" onchange="maximize()">
+        <option value="">-- Choose Category --</option>
+        <optgroup label="Auto & Transport">
+            <option value="gas">Gas & Fuel</option>
+            <option value="rental">Car Rental / Insurance</option>
+            <option value="rideshare">Rideshare (Uber/Lyft)</option>
+        </optgroup>
+        <optgroup label="Dining & Groceries">
+            <option value="dining">Restaurants & Bars</option>
+            <option value="walmart">Walmart Purchases</option>
+            <option value="costco">Costco Warehouse</option>
+        </optgroup>
+        <optgroup label="Health & Fitness">
+            <option value="medical">Doctor / Medical (Travel)</option>
+            <option value="gym">Gym / Equinox</option>
+        </optgroup>
+        <optgroup label="Personal & Home">
+            <option value="streaming">Streaming & Entertainment</option>
+            <option value="warranty">Electronics / Large Appliances</option>
+        </optgroup>
+    </select>
 
-        <nav class="flex justify-center space-x-8 mb-8 text-xs font-bold uppercase tracking-widest text-gray-500">
-            <button id="tab-daily" onclick="switchTab('daily')" class="pb-2 tab-active transition-all">Daily Life</button>
-            <button id="tab-expedition" onclick="switchTab('expedition')" class="pb-2 transition-all">Riviera Expedition</button>
-        </nav>
+    <div id="winner" class="result-box winner"></div>
+    <div id="runnerup" class="result-box runner-up"></div>
+</div>
 
-        <div class="mb-10">
-            <div class="glass-panel rounded-3xl p-1 shadow-2xl">
-                <select id="main-selector" onchange="updateCard()" class="w-full bg-transparent text-white text-sm font-black uppercase tracking-widest rounded-2xl p-5 outline-none appearance-none cursor-pointer">
-                    </select>
-            </div>
-        </div>
+<script>
+function maximize() {
+    const cat = document.getElementById('category').value;
+    const win = document.getElementById('winner');
+    const run = document.getElementById('runnerup');
 
-        <div id="display-area" class="hidden space-y-8 pb-12">
-            <div class="animate-in slide-in-from-bottom duration-500">
-                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-3 ml-2 text-center">Primary Selection</p>
-                <div id="card1-bg" class="card-face relative h-48 w-full rounded-3xl p-6 flex flex-col justify-between overflow-hidden border border-white/10">
-                    <div>
-                        <h3 id="card1-name" class="text-2xl font-black italic tracking-tight uppercase text-white"></h3>
-                        <p id="card1-type" class="text-[10px] font-bold opacity-60 uppercase mt-1 text-white"></p>
-                    </div>
-                    <div class="bg-black/60 p-4 rounded-2xl backdrop-blur-xl border border-white/10">
-                        <p id="card1-benefit" class="text-xs font-bold leading-relaxed text-white"></p>
-                    </div>
-                </div>
-            </div>
+    if(!cat) { win.style.display = 'none'; run.style.display = 'none'; return; }
 
-            <div class="animate-in slide-in-from-bottom duration-500 delay-100">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-2 text-center">Secondary Choice</p>
-                <div id="card2-bg" class="card-face relative h-40 w-full rounded-3xl p-5 flex flex-col justify-between overflow-hidden border border-gray-800">
-                    <div>
-                        <h3 id="card2-name" class="text-xl font-bold uppercase text-white"></h3>
-                        <p id="card2-type" class="text-[9px] font-bold opacity-50 uppercase mt-1 text-white"></p>
-                    </div>
-                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
-                        <p id="card2-benefit" class="text-[11px] font-medium text-gray-400 leading-snug"></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    let winner = {}, runner = {};
 
-    <script>
-        const cards = {
-            amex: { name: "Amex Schwab Platinum", type: "American Express", color: "from-gray-300 to-gray-500" },
-            costco: { name: "Costco Anywhere Biz", type: "Visa Business", color: "from-blue-600 to-blue-900" },
-            amazon: { name: "Amazon Prime Rewards", type: "Visa Signature", color: "from-gray-800 to-black" },
-            infinite: { name: "PREMIA Infinite", type: "Visa Infinite", color: "from-indigo-900 to-black" }
-        };
+    switch(cat) {
+        case 'gas':
+            [span_7](start_span)winner = { name: "Costco Anywhere Visa", reward: "4% Cash Back", note: "On first $7,000 per year[span_7](end_span)", type: "cash" };
+            [span_8](start_span)runner = { name: "OnePay Cash", reward: "3% Cash Back", note: "If Gas category is selected + OnePay Cash+ status[span_8](end_span)", type: "cash" };
+            break;
+        case 'rental':
+            winner = { name: "Popular AAdvantage Black", reward: "PRIMARY Insurance", note: "$75,000 Collision/Theft coverage. [span_9](start_span)Decline rental agency insurance[span_9](end_span)", type: "ins" };
+            [span_10](start_span)runner = { name: "Chase Visa Signature", reward: "Secondary Insurance", note: "$60,000 coverage[span_10](end_span)", type: "ins" };
+            break;
+        case 'rideshare':
+            winner = { name: "AMEX Schwab Platinum", reward: "$200 Uber Cash", note: "Distributed monthly + $120 Uber One credit", type: "ins" };
+            [span_11](start_span)runner = { name: "Costco Anywhere Visa", reward: "3% Cash Back", note: "Classified under Travel category[span_11](end_span)", type: "cash" };
+            break;
+        case 'dining':
+            [span_12](start_span)winner = { name: "Costco Anywhere Visa", reward: "3% Cash Back", note: "Includes restaurants, bars, and fast food[span_12](end_span)", type: "cash" };
+            [span_13](start_span)runner = { name: "OnePay Cash", reward: "3% Cash Back", note: "If Dining category is selected + OnePay Cash+ status[span_13](end_span)", type: "cash" };
+            break;
+        case 'walmart':
+            [span_14](start_span)winner = { name: "OnePay Mastercard", reward: "5% Cash Back", note: "If Walmart+ member and accounts are linked[span_14](end_span)", type: "cash" };
+            [span_15](start_span)runner = { name: "OnePay Mastercard", reward: "3% Cash Back", note: "Standard Walmart back[span_15](end_span)", type: "cash" };
+            break;
+        case 'costco':
+            [span_16](start_span)winner = { name: "Costco Anywhere Visa", reward: "2% Cash Back", note: "Valid at Costco and Costco.com[span_16](end_span)", type: "cash" };
+            [span_17](start_span)runner = { name: "OnePay Mastercard", reward: "1.5% Cash Back", note: "Standard base rate[span_17](end_span)", type: "cash" };
+            break;
+        case 'medical':
+            [span_18](start_span)[span_19](start_span)winner = { name: "Popular AAdvantage Black", reward: "$150,000 Coverage", note: "Emergency medical/dental expenses while traveling outside Home Country[span_18](end_span)[span_19](end_span)", type: "ins" };
+            [span_20](start_span)runner = { name: "Popular AAdvantage Black", reward: "$100,000 Evacuation", note: "Covers emergency medical evacuation/repatriation[span_20](end_span)", type: "ins" };
+            break;
+        case 'gym':
+            winner = { name: "AMEX Schwab Platinum", reward: "$300 Equinox Credit", note: "Annual statement credit for Equinox+ or club membership", type: "ins" };
+            runner = { name: "OnePay Mastercard", reward: "1.5% Cash Back", note: "Base spend rate", type: "cash" };
+            break;
+        case 'streaming':
+            winner = { name: "AMEX Schwab Platinum", reward: "$240 Digital Credit", note: "Up to $20/month for Disney+, Hulu, ESPN+, NY Times", type: "ins" };
+            runner = { name: "OnePay Mastercard", reward: "1.5% Cash Back", note: "Base spend rate", type: "cash" };
+            break;
+        case 'warranty':
+            [span_21](start_span)winner = { name: "Chase Visa Signature", reward: "+1 Year Warranty", note: "Extends manufacturer's warranty by 1 year[span_21](end_span)", type: "ins" };
+            [span_22](start_span)runner = { name: "Popular AAdvantage Black", reward: "+1 Year Warranty", note: "Up to $10,000 per occurrence[span_22](end_span)", type: "ins" };
+            break;
+    }
 
-        const menus = {
-            daily: [
-                { val: "gas", text: "⛽ Gas & Fuel (Auto)" },
-                { val: "dining", text: "🍽️ Restaurants & Dining" },
-                { val: "costco_ware", text: "🛒 Costco Warehouse" },
-                { val: "groceries", text: "🍏 Groceries (Non-Costco)" },
-                { val: "healthcare", text: "🏥 Health Services" },
-                { val: "utilities", text: "⚡ Utilities & Internet" }
-            ],
-            expedition: [
-                { val: "exp_fuel", text: "🚤 Diesel & Gasoline" },
-                { val: "exp_customs", text: "🛂 Customs & Immigration Fees" },
-                { val: "exp_cbp", text: "⚓ Customs User Fee Decal (CBP)" },
-                { val: "exp_marina", text: "🏢 Marina Slip Fees" },
-                { val: "exp_mooring", text: "⛵ Mooring Ball Fees" },
-                { val: "exp_provisions", text: "🛒 Provisions & Groceries" },
-                { val: "exp_dining", text: "🍽️ Dining & Entertainment" },
-                { val: "exp_clothing", text: "👕 Clothing & Apparel" },
-                { val: "exp_scuba", text: "🤿 Scuba & Gear Rental" },
-                { val: "exp_transport", text: "🚕 Taxis & Ferries" },
-                { val: "exp_logistics", text: "✈️ Airline & Rideshare" },
-                { val: "exp_tours", text: "📸 Tours & Photography" },
-                { val: "exp_gifts", text: "🎁 Gifts & Souvenirs" },
-                { val: "exp_medical", text: "🏥 Emergency Medical/Insurance" },
-                { val: "exp_lodging", text: "🏨 Lodging (Hotels/Resorts)" }
-            ]
-        };
+    render(win, winner);
+    render(run, runner);
+}
 
-        const logic = {
-            // Expedition Logic
-            [span_0](start_span)exp_fuel: { c1: 'amex', b1: "Earn 1X points. Marina fuel is excluded from the 4% Costco tier and only earns 1%[span_0](end_span).", c2: 'amazon', b2: "1% Cash Back as a solid secondary Visa option." },
-            exp_customs: { c1: 'amex', b1: "1X points. Best for government fees due to superior dispute support.", c2: 'infinite', b2: "1 Point per $1 spent." },
-            exp_cbp: { c1: 'infinite', b1: "1 Point per $1. Best for recurring vessel compliance fees.", c2: 'amex', b2: "Standard 1X Membership Rewards point." },
-            exp_marina: { c1: 'infinite', b1: "1 Point per $1. Most marinas do not code as 'Travel' for the 3% Costco tier.", c2: 'amex', b2: "Standard 1X Membership Rewards point." },
-            exp_mooring: { c1: 'infinite', b1: "1 Point per $1. Essential for National Park/BVI mooring site fees.", c2: 'amex', b2: "1X points." },
-            [span_1](start_span)exp_provisions: { c1: 'costco', b1: "2% back for bulk provisioning at the warehouse[span_1](end_span).", c2: 'amazon', b2: "5% back on Amazon for specialty items like Lavazza and pet food." },
-            [span_2](start_span)exp_dining: { c1: 'costco', b1: "3% cash back on restaurants, bars, and yacht club lounges worldwide[span_2](end_span).", c2: 'amazon', b2: "2% back on dining." },
-            exp_clothing: { c1: 'amex', b1: "$100 Saks Credit for quick-dry gear. Best Purchase Protection for luxury linen.", c2: 'amazon', b2: "1% cash back." },
-            [span_3](start_span)exp_scuba: { c1: 'costco', b1: "3% back on eligible travel agency gear rentals[span_3](end_span).", c2: 'infinite', b2: "$3,000 Baggage/Gear Loss protection for scuba equipment." },
-            [span_4](start_span)exp_transport: { c1: 'costco', b1: "3% back on eligible travel and taxi services[span_4](end_span).", c2: 'amazon', b2: "2% back on local transit/rideshare." },
-            [span_5](start_span)exp_logistics: { c1: 'costco', b1: "3% back on airfare and travel[span_5](end_span).", c2: 'amex', b2: "5X points on flights. $1.5M Travel Accident Insurance." },
-            [span_6](start_span)exp_tours: { c1: 'costco', b1: "3% back on tour operators and excursions[span_6](end_span).", c2: 'amex', b2: "1X points. Premium dispute protection." },
-            exp_gifts: { c1: 'amazon', b1: "5% back on Amazon for gear. 1% elsewhere.", c2: 'amex', b2: "Best for duty-free luxury due to fraud protection." },
-            exp_medical: { c1: 'amex', b1: "Premium customer support for emergency billing disputes.", c2: 'infinite', b2: "1 Point per $1 spent." },
-            [span_7](start_span)exp_lodging: { c1: 'costco', b1: "3% back on hotels and lodging worldwide[span_7](end_span).", c2: 'infinite', b2: "Visa Infinite concierge and room upgrades." },
+function render(el, data) {
+    el.style.display = 'block';
+    el.innerHTML = `
+        <span class="tag ${data.type === 'cash' ? 'tag-cash' : 'tag-ins'}">${data.type === 'cash' ? 'Highest Reward' : 'Best Protection'}</span>
+        <div style="font-weight: bold; font-size: 18px;">${data.name}</div>
+        <div style="color: #007bff; font-weight: bold; margin: 5px 0;">${data.reward}</div>
+        <div class="note">${data.note}</div>
+    `;
+}
+</script>
 
-            // Daily Routine
-            [span_8](start_span)gas: { c1: 'costco', b1: "4% back on auto fuel (first $7k/yr)[span_8](end_span).", c2: 'infinite', b2: "1 Pt/$1." },
-            [span_9](start_span)dining: { c1: 'costco', b1: "3% back on restaurants/bars worldwide[span_9](end_span).", c2: 'amazon', b2: "2% back." },
-            [span_10](start_span)costco_ware: { c1: 'costco', b1: "2% back on warehouse purchases[span_10](end_span).", c2: 'infinite', b2: "1 Pt/$1." },
-            [span_11](start_span)groceries: { c1: 'amazon', b1: "5% back at Whole Foods Market.", c2: 'costco', b2: "1% back[span_11](end_span)." },
-            healthcare: { c1: 'amex', b1: "Best support for medical billing disputes.", c2: 'infinite', b2: "Accepted in PR. 1 Pt/$1." },
-            utilities: { c1: 'infinite', b1: "Reliable for PR bills. 1 Pt/$1.", c2: 'amex', b2: "1X points." }
-        };
-
-        function switchTab(mode) {
-            const selector = document.getElementById('main-selector');
-            const dailyBtn = document.getElementById('tab-daily');
-            const expBtn = document.getElementById('tab-expedition');
-            dailyBtn.className = mode === 'daily' ? 'pb-2 tab-active transition-all' : 'pb-2 transition-all';
-            expBtn.className = mode === 'expedition' ? 'pb-2 tab-active transition-all' : 'pb-2 transition-all';
-            selector.innerHTML = `<option value="" disabled selected>Select Category</option>`;
-            menus[mode].forEach(item => { selector.innerHTML += `<option value="${item.val}">${item.text}</option>`; });
-            document.getElementById('display-area').classList.add('hidden');
-        }
-
-        function updateCard() {
-            const val = document.getElementById('main-selector').value;
-            const display = document.getElementById('display-area');
-            const data = logic[val];
-            if (data) {
-                display.classList.remove('hidden');
-                const c1 = cards[data.c1];
-                document.getElementById('card1-name').innerText = c1.name;
-                document.getElementById('card1-benefit').innerText = data.b1;
-                document.getElementById('card1-bg').className = `card-face relative h-48 w-full rounded-3xl p-6 flex flex-col justify-between overflow-hidden bg-gradient-to-br ${c1.color}`;
-                const c2 = cards[data.c2];
-                document.getElementById('card2-name').innerText = c2.name;
-                document.getElementById('card2-benefit').innerText = data.b2;
-                document.getElementById('card2-bg').className = `card-face relative h-40 w-full rounded-3xl p-5 flex flex-col justify-between overflow-hidden border border-gray-800 bg-gradient-to-br ${c2.color} bg-opacity-10`;
-                window.scrollTo({ top: display.offsetTop - 50, behavior: 'smooth' });
-            }
-        }
-        switchTab('daily');
-    </script>
 </body>
 </html>
