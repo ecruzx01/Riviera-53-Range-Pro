@@ -1,140 +1,170 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#001f3f">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Edwin's Wallet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="icon.png">
-    
-    <title>Riviera 53 Range Pro</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #001f3f; padding: 15px; color: #333; margin: 0; }
-        .card { background: white; padding: 20px; border-radius: 25px; max-width: 480px; margin: auto; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 2px solid #004080; }
-        h2 { color: #004080; text-align: center; margin: 0; font-size: 20px; text-transform: uppercase; }
-        .subtitle { text-align: center; font-size: 10px; color: #d9534f; margin-bottom: 15px; font-weight: bold; text-transform: uppercase; }
-        
-        .input-group { background: #f1f5f9; padding: 10px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #cbd5e1; }
-        label { display: block; font-weight: bold; font-size: 10px; color: #1e293b; margin-bottom: 4px; text-transform: uppercase; }
-        input { width: 100%; padding: 12px; border: 1px solid #94a3b8; border-radius: 8px; box-sizing: border-box; font-size: 18px; text-align: center; font-weight: bold; }
-
-        .engine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .engine-box { background: #f8fafc; padding: 12px; border-radius: 15px; border-top: 4px solid #004080; position: relative; }
-        .engine-label { display: block; font-weight: 900; font-size: 10px; color: #004080; margin-bottom: 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
-        
-        #imbalanceAlert { display: none; background: #fff5f5; color: #c53030; font-size: 10px; font-weight: bold; text-align: center; padding: 8px; border-radius: 8px; border: 1px solid #feb2b2; margin-bottom: 10px; animation: blink 2s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        .range-box { background: #0f172a; color: white; padding: 20px; border-radius: 18px; text-align: center; margin-top: 10px; border: 2px solid #22c55e; }
-        .range-val { font-size: 48px; font-weight: 900; color: #22c55e; display: block; line-height: 1; }
-        .footer { font-size: 9px; color: #64748b; text-align: center; margin-top: 15px; }
+        body {
+            background-image: linear-gradient(to bottom, rgba(1, 4, 9, 0.4), rgba(1, 4, 9, 0.9)), url('wallet.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #010409;
+        }
+        .glass-panel {
+            background: rgba(22, 27, 34, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .card-face { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .tab-active { color: #3b82f6; border-bottom: 2px solid #3b82f6; }
+        * { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
-<body>
+<body class="text-gray-100 font-sans min-h-screen">
 
-<div class="card">
-    <h2>Range Estimator Pro</h2>
-    <div class="subtitle">10% Safety Margin Applied</div>
+    <div class="max-w-md mx-auto p-6 min-h-screen flex flex-col">
+        <header class="text-center mt-6 mb-4">
+            <h1 class="text-3xl font-black text-blue-500 tracking-tighter uppercase italic">Edwin's Wallet</h1>
+            <p class="text-gray-400 text-[10px] font-bold tracking-[0.4em] mt-1 uppercase">Rewards Optimizer</p>
+        </header>
 
-    <div id="imbalanceAlert">⚠️ ATENCIÓN: DESBALANCE DE CONSUMO (>10%)</div>
+        <nav class="flex justify-center space-x-8 mb-8 text-xs font-bold uppercase tracking-widest text-gray-500">
+            <button id="tab-daily" onclick="switchTab('daily')" class="pb-2 tab-active transition-all">Daily Life</button>
+            <button id="tab-expedition" onclick="switchTab('expedition')" class="pb-2 transition-all">Riviera Expedition</button>
+        </nav>
 
-    <div class="input-group" style="background: #e2e8f0;">
-        <label>Total Fuel on Board (Gal):</label>
-        <input type="number" id="fuel" placeholder="900" inputmode="decimal">
-    </div>
-
-    <div class="engine-grid">
-        <div class="engine-box">
-            <span class="engine-label">PORT (Master RPM)</span>
-            <label>RPM:</label>
-            <input type="number" id="rpmP" placeholder="0" inputmode="numeric">
-            <label style="margin-top:8px;">GPH:</label>
-            <input type="number" id="gphP" placeholder="0.0" step="0.1" inputmode="decimal">
+        <div class="mb-10">
+            <div class="glass-panel rounded-3xl p-1 shadow-2xl">
+                <select id="main-selector" onchange="updateCard()" class="w-full bg-transparent text-white text-sm font-black uppercase tracking-widest rounded-2xl p-5 outline-none appearance-none cursor-pointer">
+                    </select>
+            </div>
         </div>
-        
-        <div class="engine-box" style="border-top-color: #ef4444;">
-            <span class="engine-label">STBD (Indep. GPH)</span>
-            <label>RPM:</label>
-            <input type="number" id="rpmS" placeholder="0" inputmode="numeric">
-            <label style="margin-top:8px;">GPH:</label>
-            <input type="number" id="gphS" placeholder="0.0" step="0.1" inputmode="decimal">
+
+        <div id="display-area" class="hidden space-y-8 pb-12">
+            <div class="animate-in slide-in-from-bottom duration-500">
+                <p class="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-3 ml-2 text-center">Primary Selection</p>
+                <div id="card1-bg" class="card-face relative h-48 w-full rounded-3xl p-6 flex flex-col justify-between overflow-hidden border border-white/10">
+                    <div>
+                        <h3 id="card1-name" class="text-2xl font-black italic tracking-tight uppercase text-white"></h3>
+                        <p id="card1-type" class="text-[10px] font-bold opacity-60 uppercase mt-1 text-white"></p>
+                    </div>
+                    <div class="bg-black/60 p-4 rounded-2xl backdrop-blur-xl border border-white/10">
+                        <p id="card1-benefit" class="text-xs font-bold leading-relaxed text-white"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="animate-in slide-in-from-bottom duration-500 delay-100">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-2 text-center">Secondary Choice</p>
+                <div id="card2-bg" class="card-face relative h-40 w-full rounded-3xl p-5 flex flex-col justify-between overflow-hidden border border-gray-800">
+                    <div>
+                        <h3 id="card2-name" class="text-xl font-bold uppercase text-white"></h3>
+                        <p id="card2-type" class="text-[9px] font-bold opacity-50 uppercase mt-1 text-white"></p>
+                    </div>
+                    <div class="bg-black/40 p-3 rounded-xl border border-white/5">
+                        <p id="card2-benefit" class="text-[11px] font-medium text-gray-400 leading-snug"></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="input-group">
-        <label>Current SOG (Knots):</label>
-        <input type="number" id="knots" placeholder="24.8" step="0.1" inputmode="decimal">
-    </div>
+    <script>
+        const cards = {
+            amex: { name: "Amex Schwab Platinum", type: "American Express", color: "from-gray-300 to-gray-500" },
+            costco: { name: "Costco Anywhere Biz", type: "Visa Business", color: "from-blue-600 to-blue-900" },
+            amazon: { name: "Amazon Prime Rewards", type: "Visa Signature", color: "from-gray-800 to-black" },
+            infinite: { name: "PREMIA Infinite", type: "Visa Infinite", color: "from-indigo-900 to-black" }
+        };
 
-    <div class="range-box">
-        <span style="font-size: 11px; font-weight: bold; opacity: 0.8;">SAFE NAUTICAL MILES</span>
-        <span id="resRange" class="range-val">0</span>
-        <div id="summary" style="font-size: 11px; margin-top:10px; color: #94a3b8; border-top: 1px solid #1e293b; padding-top:8px;">
-            Total Burn: 0.0 GPH | 0.00 NMPG
-        </div>
-    </div>
+        const menus = {
+            daily: [
+                { val: "gas", text: "⛽ Gas & Fuel (Auto)" },
+                { val: "dining", text: "🍽️ Restaurants & Dining" },
+                { val: "costco_ware", text: "🛒 Costco Warehouse" },
+                { val: "groceries", text: "🍏 Groceries (Non-Costco)" },
+                { val: "healthcare", text: "🏥 Health Services" },
+                { val: "utilities", text: "⚡ Utilities & Internet" }
+            ],
+            expedition: [
+                { val: "exp_fuel", text: "🚤 Diesel & Gasoline" },
+                { val: "exp_customs", text: "🛂 Customs & Immigration Fees" },
+                { val: "exp_cbp", text: "⚓ Customs User Fee Decal (CBP)" },
+                { val: "exp_marina", text: "🏢 Marina Slip Fees" },
+                { val: "exp_mooring", text: "⛵ Mooring Ball Fees" },
+                { val: "exp_provisions", text: "🛒 Provisions & Groceries" },
+                { val: "exp_dining", text: "🍽️ Dining & Entertainment" },
+                { val: "exp_clothing", text: "👕 Clothing & Apparel" },
+                { val: "exp_scuba", text: "🤿 Scuba & Gear Rental" },
+                { val: "exp_transport", text: "🚕 Taxis & Ferries" },
+                { val: "exp_logistics", text: "✈️ Airline & Rideshare" },
+                { val: "exp_tours", text: "📸 Tours & Photography" },
+                { val: "exp_gifts", text: "🎁 Gifts & Souvenirs" },
+                { val: "exp_medical", text: "🏥 Emergency Medical/Insurance" },
+                { val: "exp_lodging", text: "🏨 Lodging (Hotels/Resorts)" }
+            ]
+        };
 
-    <div class="footer">
-        Reference: 51 GPH @ 2100 RPM (0.49 NMPG)<br>
-        RIY53032D415 Performance Reference
-    </div>
-</div>
+        const logic = {
+            // Expedition Logic
+            [span_0](start_span)exp_fuel: { c1: 'amex', b1: "Earn 1X points. Marina fuel is excluded from the 4% Costco tier and only earns 1%[span_0](end_span).", c2: 'amazon', b2: "1% Cash Back as a solid secondary Visa option." },
+            exp_customs: { c1: 'amex', b1: "1X points. Best for government fees due to superior dispute support.", c2: 'infinite', b2: "1 Point per $1 spent." },
+            exp_cbp: { c1: 'infinite', b1: "1 Point per $1. Best for recurring vessel compliance fees.", c2: 'amex', b2: "Standard 1X Membership Rewards point." },
+            exp_marina: { c1: 'infinite', b1: "1 Point per $1. Most marinas do not code as 'Travel' for the 3% Costco tier.", c2: 'amex', b2: "Standard 1X Membership Rewards point." },
+            exp_mooring: { c1: 'infinite', b1: "1 Point per $1. Essential for National Park/BVI mooring site fees.", c2: 'amex', b2: "1X points." },
+            [span_1](start_span)exp_provisions: { c1: 'costco', b1: "2% back for bulk provisioning at the warehouse[span_1](end_span).", c2: 'amazon', b2: "5% back on Amazon for specialty items like Lavazza and pet food." },
+            [span_2](start_span)exp_dining: { c1: 'costco', b1: "3% cash back on restaurants, bars, and yacht club lounges worldwide[span_2](end_span).", c2: 'amazon', b2: "2% back on dining." },
+            exp_clothing: { c1: 'amex', b1: "$100 Saks Credit for quick-dry gear. Best Purchase Protection for luxury linen.", c2: 'amazon', b2: "1% cash back." },
+            [span_3](start_span)exp_scuba: { c1: 'costco', b1: "3% back on eligible travel agency gear rentals[span_3](end_span).", c2: 'infinite', b2: "$3,000 Baggage/Gear Loss protection for scuba equipment." },
+            [span_4](start_span)exp_transport: { c1: 'costco', b1: "3% back on eligible travel and taxi services[span_4](end_span).", c2: 'amazon', b2: "2% back on local transit/rideshare." },
+            [span_5](start_span)exp_logistics: { c1: 'costco', b1: "3% back on airfare and travel[span_5](end_span).", c2: 'amex', b2: "5X points on flights. $1.5M Travel Accident Insurance." },
+            [span_6](start_span)exp_tours: { c1: 'costco', b1: "3% back on tour operators and excursions[span_6](end_span).", c2: 'amex', b2: "1X points. Premium dispute protection." },
+            exp_gifts: { c1: 'amazon', b1: "5% back on Amazon for gear. 1% elsewhere.", c2: 'amex', b2: "Best for duty-free luxury due to fraud protection." },
+            exp_medical: { c1: 'amex', b1: "Premium customer support for emergency billing disputes.", c2: 'infinite', b2: "1 Point per $1 spent." },
+            [span_7](start_span)exp_lodging: { c1: 'costco', b1: "3% back on hotels and lodging worldwide[span_7](end_span).", c2: 'infinite', b2: "Visa Infinite concierge and room upgrades." },
 
-<script>
-    // Registro del Service Worker para permitir instalación
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').then(() => console.log("SW OK"));
-    }
+            // Daily Routine
+            [span_8](start_span)gas: { c1: 'costco', b1: "4% back on auto fuel (first $7k/yr)[span_8](end_span).", c2: 'infinite', b2: "1 Pt/$1." },
+            [span_9](start_span)dining: { c1: 'costco', b1: "3% back on restaurants/bars worldwide[span_9](end_span).", c2: 'amazon', b2: "2% back." },
+            [span_10](start_span)costco_ware: { c1: 'costco', b1: "2% back on warehouse purchases[span_10](end_span).", c2: 'infinite', b2: "1 Pt/$1." },
+            [span_11](start_span)groceries: { c1: 'amazon', b1: "5% back at Whole Foods Market.", c2: 'costco', b2: "1% back[span_11](end_span)." },
+            healthcare: { c1: 'amex', b1: "Best support for medical billing disputes.", c2: 'infinite', b2: "Accepted in PR. 1 Pt/$1." },
+            utilities: { c1: 'infinite', b1: "Reliable for PR bills. 1 Pt/$1.", c2: 'amex', b2: "1X points." }
+        };
 
-    const fuelIn = document.getElementById('fuel');
-    const rpmPIn = document.getElementById('rpmP');
-    const rpmSIn = document.getElementById('rpmS');
-    const gphPIn = document.getElementById('gphP');
-    const gphSIn = document.getElementById('gphS');
-    const knotsIn = document.getElementById('knots');
-    const resOut = document.getElementById('resRange');
-    const sumOut = document.getElementById('summary');
-    const alertBox = document.getElementById('imbalanceAlert');
-
-    rpmPIn.addEventListener('input', () => {
-        rpmSIn.value = rpmPIn.value;
-        calculate();
-    });
-
-    [fuelIn, rpmSIn, gphPIn, gphSIn, knotsIn].forEach(el => {
-        el.addEventListener('input', calculate);
-    });
-
-    function calculate() {
-        const fuelTotal = parseFloat(fuelIn.value) || 0;
-        const gphP = parseFloat(gphPIn.value) || 0;
-        const gphS = parseFloat(gphSIn.value) || 0;
-        const knots = parseFloat(knotsIn.value) || 0;
-
-        if (gphP > 0 && gphS > 0) {
-            const diff = Math.abs(gphP - gphS);
-            const avg = (gphP + gphS) / 2;
-            alertBox.style.display = (diff / avg > 0.10) ? "block" : "none";
-        } else {
-            alertBox.style.display = "none";
+        function switchTab(mode) {
+            const selector = document.getElementById('main-selector');
+            const dailyBtn = document.getElementById('tab-daily');
+            const expBtn = document.getElementById('tab-expedition');
+            dailyBtn.className = mode === 'daily' ? 'pb-2 tab-active transition-all' : 'pb-2 transition-all';
+            expBtn.className = mode === 'expedition' ? 'pb-2 tab-active transition-all' : 'pb-2 transition-all';
+            selector.innerHTML = `<option value="" disabled selected>Select Category</option>`;
+            menus[mode].forEach(item => { selector.innerHTML += `<option value="${item.val}">${item.text}</option>`; });
+            document.getElementById('display-area').classList.add('hidden');
         }
 
-        const totalBurn = gphP + gphS;
-        const fuelSafe = fuelTotal * 0.90; // Reserva 10%
-
-        if (totalBurn > 0 && knots > 0 && fuelSafe > 0) {
-            const nmpg = knots / totalBurn;
-            const range = fuelSafe * nmpg;
-            resOut.innerText = Math.floor(range);
-            sumOut.innerText = `Total Burn: ${totalBurn.toFixed(1)} GPH | ${nmpg.toFixed(2)} NMPG`;
-            resOut.style.color = (nmpg < 0.48) ? "#f59e0b" : "#22c55e";
-        } else {
-            resOut.innerText = "0";
-            sumOut.innerText = "Total Burn: 0.0 GPH | 0.00 NMPG";
+        function updateCard() {
+            const val = document.getElementById('main-selector').value;
+            const display = document.getElementById('display-area');
+            const data = logic[val];
+            if (data) {
+                display.classList.remove('hidden');
+                const c1 = cards[data.c1];
+                document.getElementById('card1-name').innerText = c1.name;
+                document.getElementById('card1-benefit').innerText = data.b1;
+                document.getElementById('card1-bg').className = `card-face relative h-48 w-full rounded-3xl p-6 flex flex-col justify-between overflow-hidden bg-gradient-to-br ${c1.color}`;
+                const c2 = cards[data.c2];
+                document.getElementById('card2-name').innerText = c2.name;
+                document.getElementById('card2-benefit').innerText = data.b2;
+                document.getElementById('card2-bg').className = `card-face relative h-40 w-full rounded-3xl p-5 flex flex-col justify-between overflow-hidden border border-gray-800 bg-gradient-to-br ${c2.color} bg-opacity-10`;
+                window.scrollTo({ top: display.offsetTop - 50, behavior: 'smooth' });
+            }
         }
-    }
-</script>
+        switchTab('daily');
+    </script>
 </body>
 </html>
