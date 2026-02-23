@@ -29,57 +29,24 @@
     <select id="cardSelector" onchange="runLogic()">
         <option value="">-- Search Category --</option>
         
-        <optgroup label="Auto & Transport">
-            <option value="car_ins">Car Insurance</option>
-            <option value="gas">Gas & Fuel</option>
-            <option value="parking">Parking / Tolls</option>
-            <option value="reg">Registration</option>
-            <option value="rideshare">Rideshare</option>
-            <option value="parts">Service & Parts</option>
+        <optgroup label="Yachting (BVI/USVI Trip)">
+            <option value="y_customs">Customs & Immigration Fees</option>
+            <option value="y_marina">Marina & Mooring Fees</option>
+            <option value="y_fuel">Diesel & Gasoline (Riviera/Tender)</option>
+            <option value="y_provisions">Provisions & Groceries</option>
+            <option value="y_dining">Dining & Yacht Clubs</option>
+            <option value="y_gear">Clothing & Water Sports Gear</option>
+            <option value="y_transport">Taxis, Ferries & Car Rental</option>
+            <option value="y_air">Airline (American) & Rideshare</option>
+            <option value="y_tours">Tours & Photo Expeditions</option>
+            <option value="y_medical">Emergency Medical (Island Travel)</option>
+            <option value="y_lodging">Lodging (Hotels/Resorts)</option>
         </optgroup>
 
-        <optgroup label="Dining & Drinks">
-            <option value="dining">Restaurants / Bars / Fast Food</option>
-            <option value="coffee">Coffee Shops</option>
-            <option value="delivery">Food Delivery</option>
-        </optgroup>
-
-        <optgroup label="Health">
-            <option value="med">Dentist / Doctor / Lab</option>
-            <option value="eyecare">Eyecare</option>
-            <option value="pharmacy">Pharmacy / Vitamins</option>
-            <option value="health_ins">Health Insurance</option>
-        </optgroup>
-
-        <optgroup label="Home">
-            <option value="home_imp">Home Improvement / Repairs</option>
-            <option value="home_ins">Home Insurance</option>
-            <option value="furnishings">Furnishings</option>
-            <option value="landscape">Landscape / Mortgage</option>
-        </optgroup>
-
-        <optgroup label="Travel & International">
-            <option value="travel_air">Airfare / Hotels</option>
-            <option value="travel_spec">Travel Gifts/Groceries/Pharmacy</option>
-            <option value="travel_car">Car Rental (Intl)</option>
-        </optgroup>
-
-        <optgroup label="Office & Personal">
-            <option value="office">Generator / Software / Programs</option>
-            <option value="care">Hair / Spa / Personal Care</option>
-            <option value="pets">Pet Food / Veterinary</option>
-        </optgroup>
-
-        <optgroup label="Shopping & Kids">
-            <option value="groceries">Groceries (Walmart/Costco)</option>
-            <option value="electronics">Electronics / Hobbies</option>
-            <option value="kids">Allowance / Kids Health</option>
-        </optgroup>
-
-        <optgroup label="Fees, Legal & Utilities">
-            <option value="util">Utilities (Electricity/Water/Cell)</option>
-            <option value="legal">Lawyer / Parents Allowance</option>
-            <option value="fees">Fees / Taxes / Gov Payments</option>
+        <optgroup label="Standard Categories">
+            <option value="gas">Standard Gas & Fuel</option>
+            <option value="dining">Standard Restaurants</option>
+            <option value="util">Utilities & Fees</option>
         </optgroup>
     </select>
 
@@ -89,50 +56,23 @@
 
 <script>
 const db = {
-    // AUTO
-    "car_ins": { w: ["Popular AAdvantage Black", "PRIMARY PROTECTION", "$75k Collision/Theft. Decline agency insurance.", "ins"], r: ["Chase Visa", "Secondary Protection", "$60k coverage.", "ins"] },
-    "gas": { w: ["Costco Anywhere Visa", "4% Cash Back", "Up to $7k/yr, then 1%.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Gas category selected.", "cash"] },
-    "parking": { w: ["Costco Anywhere Visa", "3% Cash Back", "Eligible travel category.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rate.", "cash"] },
-    "reg": { w: ["OnePay Mastercard", "1.5% Cash Back", "Highest base rate for Gov fees.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-    "rideshare": { w: ["AMEX Schwab Platinum", "$200 Uber Cash", "$15/mo credit + $20 Dec.", "ins"], r: ["Costco Anywhere Visa", "3% Cash Back", "Travel category.", "cash"] },
-    "parts": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best base rate.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
+    // YACHTING CATEGORIES
+    "y_customs": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best for government fees & permits.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
+    "y_marina": { w: ["Costco Anywhere Visa", "3% Cash Back", "Classified under 'Travel' (Lodging/Cruise).", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards.", "cash"] },
+    "y_fuel": { w: ["Costco Anywhere Visa", "4% Cash Back", "First $7k/yr for marine/auto fuel.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Gas category selected.", "cash"] },
+    "y_provisions": { w: ["Costco Anywhere Visa", "2% Cash Back", "Use for Costco hauls before departure.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Best for local island shops/Lavazza.", "cash"] },
+    "y_dining": { w: ["Costco Anywhere Visa", "3% Cash Back", "Restaurants, bars, and yacht clubs.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Dining selected.", "cash"] },
+    "y_gear": { w: ["Chase Visa Signature", "Purchase Protection", "Damage/Theft protection for new gear.", "ins"], r: ["Popular AAdvantage Black", "Warranty Extension", "Ideal for expensive dive tech.", "ins"] },
+    "y_transport": { w: ["Costco Anywhere Visa", "3% Cash Back", "Covers taxis, ferries, and car rentals.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards.", "cash"] },
+    "y_air": { w: ["Popular AAdvantage Black", "AA Status Benefits", "Earn miles & loyalty points on AA.", "cash"], r: ["AMEX Schwab Platinum", "$200 Uber Cash", "For airport rideshares.", "ins"] },
+    "y_tours": { w: ["Costco Anywhere Visa", "3% Cash Back", "Eligible under Travel Agencies/Tours.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards.", "cash"] },
+    "y_medical": { w: ["Popular AAdvantage Black", "$150,000 Medical", "Crucial for BVI/Island emergencies.", "ins"], r: ["Popular AAdvantage Black", "$100/Tooth Dental", "Coverage for travel injuries.", "ins"] },
+    "y_lodging": { w: ["Costco Anywhere Visa", "3% Cash Back", "Hotels and resorts worldwide.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rate.", "cash"] },
 
-    // DINING
-    "dining": { w: ["Costco Anywhere Visa", "3% Cash Back", "Restaurants, bars, fast food.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Dining selected.", "cash"] },
-    "coffee": { w: ["Costco Anywhere Visa", "3% Cash Back", "Includes cafes.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Dining selected.", "cash"] },
-    "delivery": { w: ["AMEX Schwab Platinum", "Uber Cash", "Apply to Uber Eats orders.", "ins"], r: ["Costco Anywhere Visa", "3% Cash Back", "Coded as restaurant.", "cash"] },
-
-    // HEALTH
-    "med": { w: ["Popular AAdvantage Black", "$150k Medical", "Emergency travel coverage.", "ins"], r: ["Popular AAdvantage Black", "$100/Tooth", "Accidental injury abroad.", "ins"] },
-    "eyecare": { w: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rate.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-    "pharmacy": { w: ["Popular AAdvantage Black", "Travel Assist", "Medication delivery abroad.", "ins"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards.", "cash"] },
-    "health_ins": { w: ["OnePay Mastercard", "1.5% Cash Back", "Highest base rate.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-
-    // HOME
-    "home_imp": { w: ["Chase Visa", "Purchase Protection", "Damage/Theft for 120 days.", "ins"], r: ["Popular AAdvantage Black", "Extended Warranty", "+1 year coverage.", "ins"] },
-    "home_ins": { w: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rate.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-    "furnishings": { w: ["Chase Visa", "Purchase Protection", "Up to $500 per item.", "ins"], r: ["Popular AAdvantage Black", "Extended Warranty", "+1 year coverage.", "ins"] },
-    "landscape": { w: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rate.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-
-    // TRAVEL
-    "travel_air": { w: ["Costco Anywhere Visa", "3% Cash Back", "Airfare, hotels, cruises.", "cash"], r: ["Popular AAdvantage Black", "$150k Medical", "Coverage for booked travel.", "ins"] },
-    "travel_spec": { w: ["Popular AAdvantage Black", "Travel Specific", "Insurance extends to trip gifts/meds.", "ins"], r: ["Costco Anywhere Visa", "3% Cash Back", "Travel category.", "cash"] },
-    "travel_car": { w: ["Popular AAdvantage Black", "Primary CDW", "Use for international rentals.", "ins"], r: ["Chase Visa", "Secondary CDW", "Backup coverage.", "ins"] },
-
-    // OFFICE & PERSONAL
-    "office": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best for maintenance/software.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-    "care": { w: ["OnePay Mastercard", "1.5% Cash Back", "Highest base rate.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-    "pets": { w: ["OnePay Mastercard", "1.5% Cash Back", "Pet supplies and vet.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-
-    // SHOPPING
-    "groceries": { w: ["OnePay Mastercard", "5% Cash Back", "At Walmart (w/ Walmart+).", "cash"], r: ["Costco Anywhere Visa", "2% Cash Back", "At Costco Warehouse.", "cash"] },
-    "electronics": { w: ["Chase Visa", "Purchase Protection", "New purchases covered 120 days.", "ins"], r: ["Popular AAdvantage Black", "Extended Warranty", "+1 yr warranty.", "ins"] },
-    "kids": { w: ["OnePay Mastercard", "1.5% Cash Back", "Allowance and supplies.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-
-    // FEES & UTIL
-    "util": { w: ["OnePay Mastercard", "1.5% Cash Back", "Water, electricity, cell.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-    "legal": { w: ["OnePay Mastercard", "1.5% Cash Back", "Lawyer fees / Allowances.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-    "fees": { w: ["OnePay Mastercard", "1.5% Cash Back", "Fees, Taxes, Gov payments.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] }
+    // STANDARD
+    "gas": { w: ["Costco Anywhere Visa", "4% Cash Back", "Up to $7k/yr.", "cash"], r: ["OnePay Cash", "3% Cash Back", "With Cash+ status.", "cash"] },
+    "dining": { w: ["Costco Anywhere Visa", "3% Cash Back", "Worldwide restaurants.", "cash"], r: ["OnePay Cash", "3% Cash Back", "With Cash+ status.", "cash"] },
+    "util": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best for utilities/fees.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] }
 };
 
 function runLogic() {
