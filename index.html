@@ -9,6 +9,7 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
         .app-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
         h1 { color: var(--primary); text-align: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
+        h2 { font-size: 16px; color: #555; margin-bottom: 10px; }
         select { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #cbd5e0; font-size: 16px; margin-bottom: 25px; cursor: pointer; background: #fff; }
         .result { padding: 20px; border-radius: 12px; margin-bottom: 15px; display: none; border: 1px solid #ddd; }
         .winner { background: #e7f3ff; border-left: 8px solid var(--primary); }
@@ -25,29 +26,48 @@
 
 <div class="app-container">
     <h1>c.Reward Maximizer</h1>
-    <label style="font-weight:bold; display:block; margin-bottom:10px;">Select Spending Category:</label>
-    <select id="cardSelector" onchange="runLogic()">
-        <option value="">-- Search Category --</option>
-        
-        <optgroup label="Yachting (BVI/USVI Trip)">
-            <option value="y_customs">Customs & Immigration Fees</option>
-            <option value="y_marina">Marina & Mooring Fees</option>
-            <option value="y_fuel">Diesel & Gasoline (Riviera/Tender)</option>
-            <option value="y_provisions">Provisions & Groceries</option>
-            <option value="y_dining">Dining & Yacht Clubs</option>
-            <option value="y_gear">Clothing & Water Sports Gear</option>
-            <option value="y_transport">Taxis, Ferries & Car Rental</option>
-            <option value="y_air">Airline (American) & Rideshare</option>
-            <option value="y_tours">Tours & Photo Expeditions</option>
-            <option value="y_medical">Emergency Medical (Island Travel)</option>
-            <option value="y_lodging">Lodging (Hotels/Resorts)</option>
-        </optgroup>
 
-        <optgroup label="Standard Categories">
-            <option value="gas">Standard Gas & Fuel</option>
-            <option value="dining">Standard Restaurants</option>
-            <option value="util">Utilities & Fees</option>
+    <h2>General Categories</h2>
+    <select id="genSelector" onchange="runLogic('genSelector')">
+        <option value="">-- Select General Category --</option>
+        <optgroup label="Auto & Transport">
+            <option value="car_ins">Car Insurance</option>
+            <option value="gas">Gas & Fuel</option>
+            <option value="parking">Parking / Tolls</option>
+            <option value="reg">Registration</option>
+            <option value="rideshare">Rideshare</option>
+            <option value="parts">Service & Parts</option>
         </optgroup>
+        <optgroup label="Dining & Drinks">
+            <option value="dining">Restaurants / Bars / Fast Food</option>
+            <option value="coffee">Coffee Shops</option>
+            <option value="delivery">Food Delivery</option>
+        </optgroup>
+        <optgroup label="Home">
+            <option value="home_imp">Home Improvement / Repairs</option>
+            <option value="home_ins">Home Insurance</option>
+            <option value="furnishings">Furnishings</option>
+        </optgroup>
+        <optgroup label="Shopping & Kids">
+            <option value="groceries">Groceries (Walmart/Costco)</option>
+            <option value="kids">Allowance / Kids Health</option>
+        </optgroup>
+    </select>
+
+    <h2>Yachting (Virgin Islands)</h2>
+    <select id="yachtSelector" onchange="runLogic('yachtSelector')">
+        <option value="">-- Select Yachting Category --</option>
+        <option value="customs">Customs & Immigration Fees (BVI/USVI)</option>
+        <option value="decal">Customs User Fee Decal (CBP)</option>
+        <option value="slip">Marina Slip Fees (Tortola/St. Thomas)</option>
+        <option value="mooring">Mooring Ball Fees (St. John/BVI)</option>
+        <option value="boat_fuel">Diesel & Gasoline (Riviera 53)</option>
+        <option value="yacht_pro">Provisions & Groceries (Lavazza/Pets)</option>
+        <option value="yacht_dine">Dining & Entertainment (Yacht Clubs)</option>
+        <option value="yacht_gear">Scuba & Water Sports Equipment</option>
+        <option value="yacht_trans">Island Transportation (Ferry/Taxi)</option>
+        <option value="yacht_med">Emergency Medical (Island Travel)</option>
+        <option value="yacht_lodging">Lodging (Hotels/Resorts)</option>
     </select>
 
     <div id="wBox" class="result winner"></div>
@@ -56,29 +76,35 @@
 
 <script>
 const db = {
-    // YACHTING CATEGORIES
-    "y_customs": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best for government fees & permits.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] },
-    "y_marina": { w: ["Costco Anywhere Visa", "3% Cash Back", "Classified under 'Travel' (Lodging/Cruise).", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards.", "cash"] },
-    "y_fuel": { w: ["Costco Anywhere Visa", "4% Cash Back", "First $7k/yr for marine/auto fuel.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Gas category selected.", "cash"] },
-    "y_provisions": { w: ["Costco Anywhere Visa", "2% Cash Back", "Use for Costco hauls before departure.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Best for local island shops/Lavazza.", "cash"] },
-    "y_dining": { w: ["Costco Anywhere Visa", "3% Cash Back", "Restaurants, bars, and yacht clubs.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Dining selected.", "cash"] },
-    "y_gear": { w: ["Chase Visa Signature", "Purchase Protection", "Damage/Theft protection for new gear.", "ins"], r: ["Popular AAdvantage Black", "Warranty Extension", "Ideal for expensive dive tech.", "ins"] },
-    "y_transport": { w: ["Costco Anywhere Visa", "3% Cash Back", "Covers taxis, ferries, and car rentals.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards.", "cash"] },
-    "y_air": { w: ["Popular AAdvantage Black", "AA Status Benefits", "Earn miles & loyalty points on AA.", "cash"], r: ["AMEX Schwab Platinum", "$200 Uber Cash", "For airport rideshares.", "ins"] },
-    "y_tours": { w: ["Costco Anywhere Visa", "3% Cash Back", "Eligible under Travel Agencies/Tours.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards.", "cash"] },
-    "y_medical": { w: ["Popular AAdvantage Black", "$150,000 Medical", "Crucial for BVI/Island emergencies.", "ins"], r: ["Popular AAdvantage Black", "$100/Tooth Dental", "Coverage for travel injuries.", "ins"] },
-    "y_lodging": { w: ["Costco Anywhere Visa", "3% Cash Back", "Hotels and resorts worldwide.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rate.", "cash"] },
-
-    // STANDARD
-    "gas": { w: ["Costco Anywhere Visa", "4% Cash Back", "Up to $7k/yr.", "cash"], r: ["OnePay Cash", "3% Cash Back", "With Cash+ status.", "cash"] },
-    "dining": { w: ["Costco Anywhere Visa", "3% Cash Back", "Worldwide restaurants.", "cash"], r: ["OnePay Cash", "3% Cash Back", "With Cash+ status.", "cash"] },
-    "util": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best for utilities/fees.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate.", "cash"] }
+    // GENERAL MAPPING
+    "car_ins": { w: ["Popular AAdvantage Black", "PRIMARY PROTECTION", "$75k Collision/Theft. Decline agency CDW.", "ins"], r: ["Chase Visa", "Secondary Protection", "$60k coverage.", "ins"] },
+    "gas": { w: ["Costco Anywhere Visa", "4% Cash Back", "Up to $7k/yr, then 1%.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Gas category selected.", "cash"] },
+    "parking": { w: ["Costco Anywhere Visa", "3% Cash Back", "Eligible travel category.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rate.", "cash"] },
+    "dining": { w: ["Costco Anywhere Visa", "3% Cash Back", "Restaurants, bars, fast food.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Dining selected.", "cash"] },
+    "groceries": { w: ["OnePay Mastercard", "5% Cash Back", "At Walmart (w/ Walmart+).", "cash"], r: ["Costco Anywhere Visa", "2% Cash Back", "At Costco Warehouse.", "cash"] },
+    
+    // YACHTING MAPPING
+    "customs": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best for official BVI/USVI government fees.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate.", "cash"] },
+    "decal": { w: ["OnePay Mastercard", "1.5% Cash Back", "Max base rate for CBP decal purchase.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate.", "cash"] },
+    "slip": { w: ["Costco Anywhere Visa", "3% Cash Back", "Coded as Travel/Lodging for marinas.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards rate.", "cash"] },
+    "mooring": { w: ["Costco Anywhere Visa", "3% Cash Back", "Eligible under the Travel category.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards.", "cash"] },
+    "boat_fuel": { w: ["OnePay Mastercard", "1.5% Cash Back", "Marinas (MCC 4468) often exclude the 4% Costco gas bonus.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Base rate if Marina isn't coded as Gas.", "cash"] },
+    "yacht_pro": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best for specialty groceries and local produce.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate.", "cash"] },
+    "yacht_dine": { w: ["Costco Anywhere Visa", "3% Cash Back", "Includes Yacht Clubs and resort dining.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Dining category selected.", "cash"] },
+    "yacht_gear": { w: ["Chase Visa", "Purchase Protection", "Damage/Theft protection for gear for 120 days.", "ins"], r: ["OnePay Mastercard", "1.5% Cash Back", "Best for recurring tank refills.", "cash"] },
+    "yacht_trans": { w: ["Costco Anywhere Visa", "3% Cash Back", "Ferries, taxis, and car rentals.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards rate.", "cash"] },
+    "yacht_med": { w: ["Popular AAdvantage Black", "$150,000 Medical", "Emergency medical expenses while in Virgin Islands.", "ins"], r: ["Popular AAdvantage Black", "$100,000 Evacuation", "Medical repatriation to PR/US.", "ins"] },
+    "yacht_lodging": { w: ["Costco Anywhere Visa", "3% Cash Back", "Hotels and resorts worldwide.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rate.", "cash"] }
 };
 
-function runLogic() {
-    const key = document.getElementById('cardSelector').value;
+function runLogic(selectorId) {
+    const key = document.getElementById(selectorId).value;
     const w = document.getElementById('wBox');
     const r = document.getElementById('rBox');
+    
+    // Clear the other selector when one is used
+    if (selectorId === 'genSelector') document.getElementById('yachtSelector').value = "";
+    else document.getElementById('genSelector').value = "";
 
     if (!key || !db[key]) {
         w.style.display = 'none'; r.style.display = 'none';
