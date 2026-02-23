@@ -1,123 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>c.Reward Maximizer</title>
-    <style>
-        :root { --primary: #0046be; --secondary: #e51937; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
-        .app-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
-        h1 { color: var(--primary); text-align: center; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        h2 { font-size: 16px; color: #555; margin-bottom: 10px; }
-        select { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #cbd5e0; font-size: 16px; margin-bottom: 25px; cursor: pointer; background: #fff; }
-        .result { padding: 20px; border-radius: 12px; margin-bottom: 15px; display: none; border: 1px solid #ddd; }
-        .winner { background: #e7f3ff; border-left: 8px solid var(--primary); }
-        .runner { background: #fff5f5; border-left: 8px solid var(--secondary); }
-        .tag { font-size: 10px; font-weight: bold; padding: 3px 10px; border-radius: 20px; color: white; margin-bottom: 8px; display: inline-block; text-transform: uppercase; }
-        .tag-cash { background: #2f855a; }
-        .tag-ins { background: #c05621; }
-        .card-name { font-size: 18px; font-weight: bold; color: #2d3748; }
-        .reward { font-size: 16px; font-weight: bold; color: var(--primary); margin: 5px 0; }
-        .desc { font-size: 13px; color: #4a5568; line-height: 1.4; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MaxRewards | Card Selector</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#141E30">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #141E30 0%, #243B55 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text-dark: #2c3e50;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg-gradient);
+      color: white;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 25px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    h2 {
+      text-align: center;
+      margin-top: 0;
+      font-weight: 600;
+    }
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: block;
+    }
+    select, button {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      margin-bottom: 15px;
+      outline: none;
+    }
+    select {
+      background: #fff;
+      color: #333;
+      cursor: pointer;
+    }
+    .question-box {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      display: none;
+    }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .radio-option input {
+      margin-right: 10px;
+      width: auto;
+    }
+    .results {
+      margin-top: 20px;
+    }
+    .cc-card {
+      background: var(--card-bg);
+      color: var(--text-dark);
+      padding: 18px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-left: 6px solid #ccc;
+      transition: transform 0.2s;
+    }
+    .cc-card:hover {
+      transform: translateY(-2px);
+    }
+    .cc-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+    }
+    .cc-card p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.4;
+      color: #555;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      color: #fff;
+      margin-bottom: 8px;
+      background: #333;
+    }
+  </style>
 </head>
 <body>
 
-<div class="app-container">
-    <h1>c.Reward Maximizer</h1>
+  <div class="container">
+    <h2>💳 MaxRewards</h2>
+    
+    <label for="category">Select a Spending Category:</label>
+    <select id="category" onchange="handleSelection()">
+      <option value="" disabled selected>Choose an item...</option>
+      
+      <optgroup label="Auto & Transport">
+        <option value="Auto:Car Rental">🚙 Car Rental</option>
+        <option value="Auto:Gas & Fuel">⛽ Gas & Fuel</option>
+        <option value="Auto:Rideshare">🚕 Rideshare</option>
+        <option value="Auto:Service & Parts">🔧 Service & Parts</option>
+        <option value="Auto:Tolls & Parking">🛣️ Tolls & Parking</option>
+      </optgroup>
 
-    <h2>General Categories</h2>
-    <select id="genSelector" onchange="runLogic('genSelector')">
-        <option value="">-- Select General Category --</option>
-        <optgroup label="Auto & Transport">
-            <option value="car_ins">Car Insurance</option>
-            <option value="gas">Gas & Fuel</option>
-            <option value="parking">Parking / Tolls</option>
-            <option value="reg">Registration</option>
-            <option value="rideshare">Rideshare</option>
-            <option value="parts">Service & Parts</option>
-        </optgroup>
-        <optgroup label="Dining & Drinks">
-            <option value="dining">Restaurants / Bars / Fast Food</option>
-            <option value="coffee">Coffee Shops</option>
-            <option value="delivery">Food Delivery</option>
-        </optgroup>
-        <optgroup label="Home">
-            <option value="home_imp">Home Improvement / Repairs</option>
-            <option value="home_ins">Home Insurance</option>
-            <option value="furnishings">Furnishings</option>
-        </optgroup>
-        <optgroup label="Shopping & Kids">
-            <option value="groceries">Groceries (Walmart/Costco)</option>
-            <option value="kids">Allowance / Kids Health</option>
-        </optgroup>
+      <optgroup label="Dining & Drinks">
+        <option value="Dining:Restaurants">🍽️ Restaurants & Bars</option>
+        <option value="Dining:Food Delivery">🥡 Food Delivery</option>
+        <option value="Dining:Coffee Shops">☕ Coffee Shops</option>
+      </optgroup>
+
+      <optgroup label="Travel">
+        <option value="Travel:Airfare">✈️ Airfare</option>
+        <option value="Travel:Cruises">🛳️ Cruises</option>
+        <option value="Travel:Hotels">🏨 Hotels & Lodging</option>
+        <option value="Travel:Baggage Fee">🧳 Baggage Fee</option>
+      </optgroup>
+
+      <optgroup label="Shopping & Hobbies">
+        <option value="Shopping:Costco">🏪 Groceries (Costco)</option>
+        <option value="Shopping:Walmart">🛒 Groceries (Walmart)</option>
+        <option value="Shopping:Electronics">💻 Electronics / Photography</option>
+        <option value="Shopping:Hobbies">🎯 Hobbies</option>
+      </optgroup>
+
+      <optgroup label="Yachting">
+        <option value="Yachting:Diesel">⛽ Yachting: Diesel & Gasoline</option>
+        <option value="Yachting:Marina">⚓ Yachting: Marina & Port Fees</option>
+        <option value="Yachting:Parts">🔧 Yachting: Parts & Maintenance</option>
+      </optgroup>
+      
+      <optgroup label="Lifestyle & Subscriptions">
+        <option value="Life:Pets">🐶 Pet Food & Vet</option>
+        <option value="Life:Subscriptions">📺 Subscriptions</option>
+      </optgroup>
     </select>
 
-    <h2>Yachting (Virgin Islands)</h2>
-    <select id="yachtSelector" onchange="runLogic('yachtSelector')">
-        <option value="">-- Select Yachting Category --</option>
-        <option value="customs">Customs & Immigration Fees (BVI/USVI)</option>
-        <option value="decal">Customs User Fee Decal (CBP)</option>
-        <option value="slip">Marina Slip Fees (Tortola/St. Thomas)</option>
-        <option value="mooring">Mooring Ball Fees (St. John/BVI)</option>
-        <option value="boat_fuel">Diesel & Gasoline (Riviera 53)</option>
-        <option value="yacht_pro">Provisions & Groceries (Lavazza/Pets)</option>
-        <option value="yacht_dine">Dining & Entertainment (Yacht Clubs)</option>
-        <option value="yacht_gear">Scuba & Water Sports Equipment</option>
-        <option value="yacht_trans">Island Transportation (Ferry/Taxi)</option>
-        <option value="yacht_med">Emergency Medical (Island Travel)</option>
-        <option value="yacht_lodging">Lodging (Hotels/Resorts)</option>
-    </select>
+    <div id="questionBox" class="question-box">
+      <label id="questionText"></label>
+      <div id="radioOptions"></div>
+    </div>
 
-    <div id="wBox" class="result winner"></div>
-    <div id="rBox" class="result runner"></div>
-</div>
+    <div id="results" class="results"></div>
+  </div>
 
-<script>
-const db = {
-    // GENERAL MAPPING
-    "car_ins": { w: ["Popular AAdvantage Black", "PRIMARY PROTECTION", "$75k Collision/Theft. Decline agency CDW.", "ins"], r: ["Chase Visa", "Secondary Protection", "$60k coverage.", "ins"] },
-    "gas": { w: ["Costco Anywhere Visa", "4% Cash Back", "Up to $7k/yr, then 1%.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Gas category selected.", "cash"] },
-    "parking": { w: ["Costco Anywhere Visa", "3% Cash Back", "Eligible travel category.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rate.", "cash"] },
-    "dining": { w: ["Costco Anywhere Visa", "3% Cash Back", "Restaurants, bars, fast food.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Dining selected.", "cash"] },
-    "groceries": { w: ["OnePay Mastercard", "5% Cash Back", "At Walmart (w/ Walmart+).", "cash"], r: ["Costco Anywhere Visa", "2% Cash Back", "At Costco Warehouse.", "cash"] },
-    
-    // YACHTING MAPPING
-    "customs": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best for official BVI/USVI government fees.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate.", "cash"] },
-    "decal": { w: ["OnePay Mastercard", "1.5% Cash Back", "Max base rate for CBP decal purchase.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate.", "cash"] },
-    "slip": { w: ["Costco Anywhere Visa", "3% Cash Back", "Coded as Travel/Lodging for marinas.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards rate.", "cash"] },
-    "mooring": { w: ["Costco Anywhere Visa", "3% Cash Back", "Eligible under the Travel category.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards.", "cash"] },
-    "boat_fuel": { w: ["OnePay Mastercard", "1.5% Cash Back", "Marinas (MCC 4468) often exclude the 4% Costco gas bonus.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Base rate if Marina isn't coded as Gas.", "cash"] },
-    "yacht_pro": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best for specialty groceries and local produce.", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate.", "cash"] },
-    "yacht_dine": { w: ["Costco Anywhere Visa", "3% Cash Back", "Includes Yacht Clubs and resort dining.", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Dining category selected.", "cash"] },
-    "yacht_gear": { w: ["Chase Visa", "Purchase Protection", "Damage/Theft protection for gear for 120 days.", "ins"], r: ["OnePay Mastercard", "1.5% Cash Back", "Best for recurring tank refills.", "cash"] },
-    "yacht_trans": { w: ["Costco Anywhere Visa", "3% Cash Back", "Ferries, taxis, and car rentals.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards rate.", "cash"] },
-    "yacht_med": { w: ["Popular AAdvantage Black", "$150,000 Medical", "Emergency medical expenses while in Virgin Islands.", "ins"], r: ["Popular AAdvantage Black", "$100,000 Evacuation", "Medical repatriation to PR/US.", "ins"] },
-    "yacht_lodging": { w: ["Costco Anywhere Visa", "3% Cash Back", "Hotels and resorts worldwide.", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rate.", "cash"] }
-};
-
-function runLogic(selectorId) {
-    const key = document.getElementById(selectorId).value;
-    const w = document.getElementById('wBox');
-    const r = document.getElementById('rBox');
-    
-    // Clear the other selector when one is used
-    if (selectorId === 'genSelector') document.getElementById('yachtSelector').value = "";
-    else document.getElementById('genSelector').value = "";
-
-    if (!key || !db[key]) {
-        w.style.display = 'none'; r.style.display = 'none';
-        return;
+  <script>
+    // Register Service Worker for PWA installation
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js')
+        .catch(err => console.error('Service Worker registration failed:', err));
     }
 
-    const data = db[key];
-    w.style.display = 'block'; r.style.display = 'block';
+    // Card Database mapped to uploaded benefits
+    const db = {
+      amex: { name: "AMEX Schwab Platinum", color: "#8a959e", badge: "Premium Rewards", text: "5X MR points on Flights/Prepaid Hotels. 2X on Cruises. Includes $200 Uber Cash, $400 Resy Credit, and $300 Digital Entertainment." },
+      citiAA: { name: "Citi AAdvantage Executive", color: "#1a2c42", badge: "Airline Status", text: "4X AA miles. 10X on AA Cars/Hotels. Features Admirals Club, $120 Lyft Credit, $120 Grubhub Credit, and Free Checked Bags." },
+      citiCostco: { name: "Citi Costco Business Visa", color: "#d32f2f", badge: "Cash Back", text: "4% Cash Back on Gas/EV (up to $7k), 3% on Restaurants/Travel, 2% at Costco." },
+      onePay: { name: "OnePay CashRewards", color: "#6c63ff", badge: "Flat Rate", text: "5% Cash Back at Walmart (with W+ membership). 1.5% flat cash back everywhere else." },
+      bpprInf: { name: "BPPR Visa Infinite", color: "#000000", badge: "Travel Protection", text: "Primary Auto Rental Insurance (up to 31 days). Features LoungeKey, Visa Concierge, and Trip Delay/Cancellation protection." },
+      bpprMax: { name: "BPPR Business Rewards Max", color: "#005a8b", badge: "Purchase Protection", text: "Doubles manufacturer's warranty (up to 1 extra year). Includes Purchase Protection up to $5,000 per incident." },
+      bpprBlack: { name: "BPPR AAdvantage MC Black", color: "#222222", badge: "Travel Protection", text: "Primary MasterRental Insurance up to $75,000. Earns 1 AA mile per $1 spent. Includes Luggage Protection." }
+    };
 
-    w.innerHTML = `<span class="tag ${data.w[3]==='cash'?'tag-cash':'tag-ins'}">${data.w[3]==='cash'?'Cash Max':'Protection'}</span><div class="card-name">${data.w[0]}</div><div class="reward">${data.w[1]}</div><div class="desc">${data.w[2]}</div>`;
-    r.innerHTML = `<span class="tag ${data.r[3]==='cash'?'tag-cash':'tag-ins'}">${data.r[3]==='cash'?'Cash Max':'Protection'}</span><div class="card-name">${data.r[0]}</div><div class="reward">${data.r[1]}</div><div class="desc">${data.r[2]}</div>`;
-}
-</script>
+    function renderCards(card1, card2) {
+      const res = document.getElementById('results');
+      res.innerHTML = `
+        <div class="cc-card" style="border-left-color: ${card1.color}">
+          <span class="badge" style="background: ${card1.color}">${card1.badge}</span>
+          <h3>1. ${card1.name}</h3>
+          <p>${card1.text}</p>
+        </div>
+        <div class="cc-card" style="border-left-color: ${card2.color}">
+          <span class="badge" style="background: ${card2.color}">${card2.badge}</span>
+          <h3>2. ${card2.name}</h3>
+          <p>${card2.text}</p>
+        </div>
+      `;
+    }
 
+    function handleSelection() {
+      const cat = document.getElementById('category').value;
+      const qBox = document.getElementById('questionBox');
+      const qText = document.getElementById('questionText');
+      const options = document.getElementById('radioOptions');
+      const res = document.getElementById('results');
+      
+      qBox.style.display = 'none';
+      options.innerHTML = '';
+      res.innerHTML = '';
+
+      // Logic with clarifying questions
+      if (cat === "Auto:Car Rental") {
+        qBox.style.display = 'block';
+        qText.innerText = "What is your top priority for this rental?";
+        options.innerHTML = `
+          <label class="radio-option"><input type="radio" name="subq" value="ins" onclick="resolve('cr_ins')"> Primary Insurance Coverage</label>
+          <label class="radio-option"><input type="radio" name="subq" value="disc" onclick="resolve('cr_disc')"> Discounts & Statement Credits</label>
+          <label class="radio-option"><input type="radio" name="subq" value="rew" onclick="resolve('cr_rew')"> Maximum Points / Cash Back</label>
+        `;
+      } else if (cat === "Travel:Airfare" || cat === "Travel:Baggage Fee") {
+        qBox.style.display = 'block';
+        qText.innerText = "Are you flying with American Airlines?";
+        options.innerHTML = `
+          <label class="radio-option"><input type="radio" name="subq" value="yes" onclick="resolve('air_aa')"> Yes</label>
+          <label class="radio-option"><input type="radio" name="subq" value="no" onclick="resolve('air_other')"> No</label>
+        `;
+      } else if (cat === "Dining:Food Delivery") {
+        qBox.style.display = 'block';
+        qText.innerText = "Which service are you using?";
+        options.innerHTML = `
+          <label class="radio-option"><input type="radio" name="subq" value="gh" onclick="resolve('food_gh')"> Grubhub</label>
+          <label class="radio-option"><input type="radio" name="subq" value="uber" onclick="resolve('food_uber')"> UberEats</label>
+          <label class="radio-option"><input type="radio" name="subq" value="other" onclick="resolve('food_other')"> Other</label>
+        `;
+      } else if (cat === "Dining:Restaurants") {
+        qBox.style.display = 'block';
+        qText.innerText = "Are you booking through Resy?";
+        options.innerHTML = `
+          <label class="radio-option"><input type="radio" name="subq" value="yes" onclick="resolve('dine_resy')"> Yes</label>
+          <label class="radio-option"><input type="radio" name="subq" value="no" onclick="resolve('dine_other')"> No</label>
+        `;
+      } else if (cat === "Shopping:Electronics" || cat === "Shopping:Hobbies" || cat === "Yachting:Parts") {
+        qBox.style.display = 'block';
+        qText.innerText = "Do you want Extended Warranty / Purchase Protection for this item?";
+        options.innerHTML = `
+          <label class="radio-option"><input type="radio" name="subq" value="yes" onclick="resolve('shop_protect')"> Yes, protect this purchase</label>
+          <label class="radio-option"><input type="radio" name="subq" value="no" onclick="resolve('shop_rewards')"> No, maximize cash back</label>
+        `;
+      } else {
+        // Direct resolving for straightforward categories
+        resolve(cat);
+      }
+    }
+
+    function resolve(decision) {
+      switch(decision) {
+        // Conditionals
+        case 'cr_ins': renderCards(db.bpprInf, db.bpprBlack); break;
+        case 'cr_disc': renderCards(db.citiAA, db.amex); break;
+        case 'cr_rew': renderCards(db.citiAA, db.citiCostco); break;
+        
+        case 'air_aa': renderCards(db.citiAA, db.amex); break;
+        case 'air_other': renderCards(db.amex, db.citiCostco); break;
+        
+        case 'food_gh': renderCards(db.citiAA, db.citiCostco); break;
+        case 'food_uber': renderCards(db.amex, db.citiCostco); break;
+        case 'food_other': renderCards(db.citiCostco, db.onePay); break;
+        
+        case 'dine_resy': renderCards(db.amex, db.citiCostco); break;
+        case 'dine_other': renderCards(db.citiCostco, db.onePay); break;
+        
+        case 'shop_protect': renderCards(db.bpprMax, db.bpprBlack); break;
+        case 'shop_rewards': renderCards(db.onePay, db.citiCostco); break;
+
+        // Direct categories
+        case 'Auto:Gas & Fuel':
+        case 'Yachting:Diesel': renderCards(db.citiCostco, db.onePay); break;
+        case 'Auto:Rideshare': renderCards(db.amex, db.citiAA); break;
+        case 'Auto:Tolls & Parking':
+        case 'Auto:Service & Parts': renderCards(db.onePay, db.citiCostco); break;
+        
+        case 'Travel:Cruises': renderCards(db.amex, db.citiCostco); break;
+        case 'Travel:Hotels': renderCards(db.amex, db.citiAA); break;
+        
+        case 'Shopping:Costco': renderCards(db.citiCostco, db.onePay); break;
+        case 'Shopping:Walmart': renderCards(db.onePay, db.amex); break;
+        
+        case 'Yachting:Marina':
+        case 'Life:Pets': renderCards(db.onePay, db.bpprMax); break;
+        case 'Life:Subscriptions': renderCards(db.amex, db.onePay); break;
+        case 'Dining:Coffee Shops': renderCards(db.citiCostco, db.onePay); break;
+        
+        default: renderCards(db.onePay, db.citiCostco);
+      }
+    }
+  </script>
 </body>
 </html>
