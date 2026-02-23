@@ -7,10 +7,8 @@
   <link rel="manifest" href="manifest.json">
   <style>
     :root {
-      --bg-overlay: rgba(15, 23, 42, 0.85);
       --card-bg: #ffffff;
       --text-main: #1e293b;
-      --text-light: #64748b;
     }
     body {
       margin: 0;
@@ -26,16 +24,18 @@
     .app-container {
       background: var(--card-bg);
       width: 100%;
-      max-width: 500px;
+      max-width: 550px;
       border-radius: 16px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       padding: 30px;
       box-sizing: border-box;
       margin: 20px;
+      max-height: 90vh;
+      overflow-y: auto;
     }
     .header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
     }
     .header img {
       width: 64px;
@@ -100,6 +100,7 @@
       border-radius: 6px;
       margin-bottom: 15px;
       display: none;
+      line-height: 1.4;
     }
     .cc-card {
       padding: 16px;
@@ -115,11 +116,11 @@
       font-size: 0.85rem;
       opacity: 0.9;
       margin-top: 4px;
+      font-weight: normal;
     }
     
     /* Card Colors */
     .bg-costco { background: linear-gradient(135deg, #005f83, #0082b3); }
-    .bg-amazon { background: linear-gradient(135deg, #1c2938, #37475a); }
     .bg-schwab { background: linear-gradient(135deg, #a6a8ab, #c0c2c4); color: #1e293b; }
     .bg-bppr { background: linear-gradient(135deg, #e3000f, #ff3333); }
     .bg-aa { background: linear-gradient(135deg, #2b2b2b, #4b4b4b); }
@@ -136,12 +137,12 @@
 
   <select id="category-select">
     <option value="" disabled selected>Select a spending category...</option>
-    </select>
+  </select>
 
   <div id="sub-question">
     <p>What is your top priority for this rental?</p>
-    <button class="sub-btn" onclick="resolveSub('insurance')">Coverage (Primary Insurance)</button>
-    <button class="sub-btn" onclick="resolveSub('discount')">Discounts & Perks</button>
+    <button class="sub-btn" onclick="resolveSub('insurance')">Coverage (Primary Insurance up to 1.5M / $75k)</button>
+    <button class="sub-btn" onclick="resolveSub('discount')">Discounted Rental Rate & Elite Status</button>
     <button class="sub-btn" onclick="resolveSub('cashback')">Maximize Cash Back</button>
   </div>
 
@@ -154,57 +155,193 @@
 </div>
 
 <script>
-  // Spending Categories & Logic
-  const categories = {
-    "Auto & Transport: Gas & Fuel": { emoji: "⛽", cards: [ { name: "Citi Costco Anywhere Visa", perk: "4% cash back (up to $7k/yr)", color: "bg-costco" }, { name: "Amazon Prime Visa", perk: "2% cash back", color: "bg-amazon" } ] },
-    "Dining & Drinks: Restaurants": { emoji: "🍽️", cards: [ { name: "Citi Costco Anywhere Visa", perk: "3% cash back", color: "bg-costco" }, { name: "Amazon Prime Visa", perk: "2% cash back", color: "bg-amazon" } ] },
-    "Groceries (General)": { emoji: "🛒", cards: [ { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" }, { name: "Amazon Prime Visa", perk: "1% cash back", color: "bg-amazon" } ] },
-    "Groceries (Walmart)": { emoji: "🏪", cards: [ { name: "OnePay", perk: "3% to 5% cash back (with Walmart+)", color: "bg-onepay" }, { name: "Citi Costco Anywhere Visa", perk: "1% cash back", color: "bg-costco" } ] },
-    "Travel: Airfare": { emoji: "✈️", cards: [ { name: "AMEX Schwab Platinum", perk: "5x points on flights", color: "bg-schwab" }, { name: "Citi AAdvantage Executive", perk: "4x AA miles & Lounge Access", color: "bg-aa" } ] },
-    "Travel: Hotels & Lodging": { emoji: "🏨", cards: [ { name: "AMEX Schwab Platinum", perk: "5x points on prepaid hotels", color: "bg-schwab" }, { name: "Citi AAdvantage Executive", perk: "10x AA miles on AA hotels", color: "bg-aa" } ] },
-    "Travel: Car Rental": { emoji: "🚗", requiresSubChoice: true },
-    "Yachting: Diesel & Gasoline": { 
-      emoji: "🛥️", 
-      note: "Important: Marina fuel frequently codes under MCC 5932 (Marinas), which does NOT trigger standard gas station multipliers. A strong flat-rate card is highly recommended here.",
-      cards: [ { name: "OnePay", perk: "1.5% flat cash back on all transactions", color: "bg-onepay" }, { name: "Citi AAdvantage Executive", perk: "1x AA mile (Builds loyalty status)", color: "bg-aa" } ] 
+  // Full category mapping logic derived from the 8 PDFs and MCC guidelines
+  const rulesMap = {
+    gas: {
+      cards: [ { name: "Citi Costco Anywhere Visa", perk: "4% cash back (up to $7k/yr)", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat (or 3% if selected as monthly category)", color: "bg-onepay" } ]
     },
-    "Yachting: Port Entry & Customs Fees": { emoji: "🛂", cards: [ { name: "Citi AAdvantage Executive", perk: "Global Entry Credit available", color: "bg-aa" }, { name: "AMEX Schwab Platinum", perk: "No Foreign Transaction Fees", color: "bg-schwab" } ] },
-    "Yachting: Marina Slip & Mooring Fees": { emoji: "⚓", cards: [ { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" }, { name: "AMEX Schwab Platinum", perk: "1x points (No FTF if international)", color: "bg-schwab" } ] },
-    "Shopping: Electronics": { emoji: "💻", cards: [ { name: "Amazon Prime Visa", perk: "5% back (if buying on Amazon)", color: "bg-amazon" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ] }
+    dining: {
+      cards: [ { name: "Citi Costco Anywhere Visa", perk: "3% cash back", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat (or 3% if selected as monthly category)", color: "bg-onepay" } ]
+    },
+    travel_airfare: {
+      cards: [ { name: "AMEX Schwab Platinum", perk: "5x points on flights (booked directly or via AmexTravel)", color: "bg-schwab" }, { name: "Citi AAdvantage Executive", perk: "4x AA miles on American Airlines", color: "bg-aa" } ]
+    },
+    travel_hotel: {
+      cards: [ { name: "AMEX Schwab Platinum", perk: "5x points on prepaid hotels via AmexTravel", color: "bg-schwab" }, { name: "Citi Costco Anywhere Visa", perk: "3% cash back on travel", color: "bg-costco" } ]
+    },
+    travel_other: {
+      cards: [ { name: "Citi Costco Anywhere Visa", perk: "3% cash back on travel", color: "bg-costco" }, { name: "AMEX Schwab Platinum", perk: "1x points (No Foreign Transaction Fees)", color: "bg-schwab" } ]
+    },
+    travel_car_rental: {
+      requiresSubChoice: true
+    },
+    costco: {
+      cards: [ { name: "Citi Costco Anywhere Visa", perk: "2% cash back at Costco", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ]
+    },
+    walmart: {
+      cards: [ { name: "OnePay", perk: "3% to 5% cash back (with Walmart+)", color: "bg-onepay" }, { name: "Citi Costco Anywhere Visa", perk: "1% cash back", color: "bg-costco" } ]
+    },
+    marina_fuel: {
+      note: "⚠️ Important: Marina fuel frequently codes under MCC 5932 (Marinas), which does NOT trigger standard gas station multipliers. A strong flat-rate card is highly recommended here.",
+      cards: [ { name: "OnePay", perk: "1.5% flat cash back on all transactions", color: "bg-onepay" }, { name: "BPPR AAdvantage MC Black", perk: "1x AA mile (Builds loyalty status)", color: "bg-bppr" } ]
+    },
+    marina_fees: {
+      cards: [ { name: "AMEX Schwab Platinum", perk: "No Foreign Transaction Fees", color: "bg-schwab" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ]
+    },
+    default: {
+      cards: [ { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" }, { name: "BPPR AAdvantage MC Black", perk: "1x AA mile on everyday purchases", color: "bg-bppr" } ]
+    }
   };
 
   const carRentalSubChoices = {
-    "insurance": [ { name: "BPPR Visa Infinite", perk: "Primary Coverage up to 31 days ($75k limit)", color: "bg-bppr" }, { name: "BPPR AAdvantage MC Black", perk: "MasterRental Primary Coverage", color: "bg-bppr" } ],
-    "discount": [ { name: "Citi AAdvantage Executive", perk: "Avis/Budget discounts & $120 credit", color: "bg-aa" }, { name: "AMEX Schwab Platinum", perk: "Hertz/Avis/National Elite Status", color: "bg-schwab" } ],
-    "cashback": [ { name: "Citi Costco Anywhere Visa", perk: "3% cash back on travel", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ]
+    "insurance": [ { name: "BPPR Visa Infinite", perk: "Primary Coverage up to 31 days (Declining CDW/LDW required)", color: "bg-bppr" }, { name: "BPPR AAdvantage MC Black", perk: "MasterRental Primary Coverage up to $75k", color: "bg-bppr" } ],
+    "discount": [ { name: "AMEX Schwab Platinum", perk: "Hertz President's Circle, Avis & National Elite Status", color: "bg-schwab" }, { name: "Citi AAdvantage Executive", perk: "Avis/Budget discounts & up to $120 back", color: "bg-aa" } ],
+    "cashback": [ { name: "Citi Costco Anywhere Visa", perk: "3% cash back on travel & rentals", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ]
   };
+
+  // Full exhaustive list from the CATEGORIES.pdf
+  const allCategories = [
+    { name: "Auto & Transport:Car Insurance", emoji: "🚗", type: "default" },
+    { name: "Auto & Transport:Gas & Fuel", emoji: "⛽", type: "gas" },
+    { name: "Auto & Transport:Parking", emoji: "🅿️", type: "default" },
+    { name: "Auto & Transport: Registration:Registration (Other)", emoji: "🚗", type: "default" },
+    { name: "Auto & Transport: Registration:Registration Fees", emoji: "🚗", type: "default" },
+    { name: "Auto & Transport:Rideshare", emoji: "🚕", type: "travel_other" },
+    { name: "Auto & Transport:Service & Parts", emoji: "🔧", type: "default" },
+    { name: "Auto & Transport:Tolls", emoji: "🛣️", type: "default" },
+    { name: "Cash & ATM", emoji: "🏧", type: "default" },
+    { name: "Dining & Drinks:Bars", emoji: "🍻", type: "dining" },
+    { name: "Dining & Drinks:Coffee Shops", emoji: "☕", type: "dining" },
+    { name: "Dining & Drinks:Dining & Drinks (Other)", emoji: "🍽️", type: "dining" },
+    { name: "Dining & Drinks:Fast Food", emoji: "🍔", type: "dining" },
+    { name: "Dining & Drinks: Food Delivery", emoji: "🥡", type: "dining" },
+    { name: "Dining & Drinks: Restaurants", emoji: "🍽️", type: "dining" },
+    { name: "Education:Software", emoji: "🎓", type: "default" },
+    { name: "Entertainment", emoji: "🎟️", type: "default" },
+    { name: "Fees & Charges:ATM Fee", emoji: "💸", type: "default" },
+    { name: "Fees & Charges: Fees & Charges (Other)", emoji: "💸", type: "default" },
+    { name: "Fees & Charges: Finance Charge", emoji: "💸", type: "default" },
+    { name: "Fees & Charges: Government Payments", emoji: "🏛️", type: "default" },
+    { name: "Fees & Charges:Late Fee", emoji: "💸", type: "default" },
+    { name: "Fees & Charges:Service Fee", emoji: "💸", type: "default" },
+    { name: "Financial:Financial (Other)", emoji: "🏦", type: "default" },
+    { name: "Financial:Financial Advisor", emoji: "📈", type: "default" },
+    { name: "Financial:Life Insurance", emoji: "🛡️", type: "default" },
+    { name: "Fitness:Gym", emoji: "🏋️", type: "default" },
+    { name: "Gifts", emoji: "🎁", type: "default" },
+    { name: "Groceries", emoji: "🛒", type: "default" },
+    { name: "Health: Dentist", emoji: "🦷", type: "default" },
+    { name: "Health:Doctor", emoji: "👨‍⚕️", type: "default" },
+    { name: "Health:Eyecare", emoji: "👁️", type: "default" },
+    { name: "Health: Health (Other)", emoji: "⚕️", type: "default" },
+    { name: "Health: Health Insurance", emoji: "🛡️", type: "default" },
+    { name: "Health:Laboratory", emoji: "🔬", type: "default" },
+    { name: "Health: Pharmacy", emoji: "💊", type: "default" },
+    { name: "Health:Vitamins & Supplements", emoji: "💊", type: "default" },
+    { name: "Home: Furnishings", emoji: "🛋️", type: "default" },
+    { name: "Home: Home Improvement", emoji: "🔨", type: "default" },
+    { name: "Home: Home Insurance", emoji: "🛡️", type: "default" },
+    { name: "Home: Home Services", emoji: "🧹", type: "default" },
+    { name: "Home: Landscape", emoji: "🌳", type: "default" },
+    { name: "Home: Mortgage", emoji: "🏠", type: "default" },
+    { name: "Home: Repairs & Maintenance", emoji: "🔧", type: "default" },
+    { name: "Kids:Allowance", emoji: "👶", type: "default" },
+    { name: "Kids: Baby Supplies", emoji: "🍼", type: "default" },
+    { name: "Kids: Kids Health Insurance", emoji: "🛡️", type: "default" },
+    { name: "Legal:Lawyer Fees", emoji: "⚖️", type: "default" },
+    { name: "Legal:Legal (Other)", emoji: "⚖️", type: "default" },
+    { name: "Legal:Parents Allowence", emoji: "👵", type: "default" },
+    { name: "Loans", emoji: "💳", type: "default" },
+    { name: "Office:Generator Fuel", emoji: "⛽", type: "gas" },
+    { name: "Office:Generator Maintenance", emoji: "🔧", type: "default" },
+    { name: "Office:Office Music", emoji: "🎵", type: "default" },
+    { name: "Office:Programs & Software", emoji: "💻", type: "default" },
+    { name: "Office:Software Subscription", emoji: "💻", type: "default" },
+    { name: "Personal Care:Hair", emoji: "💇", type: "default" },
+    { name: "Personal Care: Personal Care (Other)", emoji: "💆", type: "default" },
+    { name: "Personal Care: Shallowness", emoji: "💅", type: "default" },
+    { name: "Personal Care:Spa", emoji: "🧖", type: "default" },
+    { name: "Pets:Pet Food & Supplies", emoji: "🐾", type: "default" },
+    { name: "Pets: Pets (Other)", emoji: "🐾", type: "default" },
+    { name: "Pets:Veterinary", emoji: "🩺", type: "default" },
+    { name: "Shopping:Clothing", emoji: "👕", type: "default" },
+    { name: "Shopping: Electronics", emoji: "💻", type: "default" },
+    { name: "Shopping: Hobbies", emoji: "🎨", type: "default" },
+    { name: "Shopping: Jewelry", emoji: "💍", type: "default" },
+    { name: "Shopping: Shipping", emoji: "📦", type: "default" },
+    { name: "Shopping: Shopping (Other)", emoji: "🛍️", type: "default" },
+    { name: "Subscriptions", emoji: "📅", type: "default" },
+    { name: "Taxes: Local Tax", emoji: "🧾", type: "default" },
+    { name: "Taxes: Property Tax", emoji: "🧾", type: "default" },
+    { name: "Taxes:State Tax", emoji: "🧾", type: "default" },
+    { name: "Taxes: Taxes (Other)", emoji: "🧾", type: "default" },
+    { name: "Travel:Airfare", emoji: "✈️", type: "travel_airfare" },
+    { name: "Travel:Baggage Fee", emoji: "🧳", type: "travel_other" },
+    { name: "Travel: Car Rental", emoji: "🚗", type: "travel_car_rental" },
+    { name: "Travel:Car Rental Fuel", emoji: "⛽", type: "gas" },
+    { name: "Travel:Excursions & Tours", emoji: "🗺️", type: "travel_other" },
+    { name: "Travel:Gifts - T", emoji: "🎁", type: "default" },
+    { name: "Travel:Groceries - T", emoji: "🛒", type: "default" },
+    { name: "Travel: Healthcare - T", emoji: "⚕️", type: "default" },
+    { name: "Travel:Hotels & Lodging", emoji: "🏨", type: "travel_hotel" },
+    { name: "Travel:Personal Care - T", emoji: "💆", type: "default" },
+    { name: "Travel: Pharmacy - T", emoji: "💊", type: "default" },
+    { name: "Travel: Restaurants - T", emoji: "🍽️", type: "dining" },
+    { name: "Travel:Rideshare - T", emoji: "🚕", type: "travel_other" },
+    { name: "Travel:Shopping - T", emoji: "🛍️", type: "default" },
+    { name: "Travel:Taxi - T", emoji: "🚕", type: "travel_other" },
+    { name: "Travel: Travel (Other)", emoji: "🧳", type: "travel_other" },
+    { name: "Travel:Travel Others", emoji: "🧳", type: "travel_other" },
+    { name: "Travel: Travel Subscription", emoji: "📅", type: "travel_other" },
+    { name: "Utilities:Cable TV", emoji: "📺", type: "default" },
+    { name: "Utilities:Cellular Service", emoji: "📱", type: "default" },
+    { name: "Utilities: Electricity", emoji: "💡", type: "default" },
+    { name: "Utilities:Internet", emoji: "🌐", type: "default" },
+    { name: "Utilities:Utilities (Other)", emoji: "🔌", type: "default" },
+    { name: "Utilities:Water", emoji: "💧", type: "default" },
+    { name: "Yachting:Port Entry & Customs Fees", emoji: "🛂", type: "marina_fees" },
+    { name: "Yachting:Customs User Fee Decal (CBP)", emoji: "🛂", type: "marina_fees" },
+    { name: "Yachting:Marina Slip Fees", emoji: "⚓", type: "marina_fees" },
+    { name: "Yachting:Mooring Ball Fees", emoji: "⚓", type: "marina_fees" },
+    { name: "Yachting: Diesel & Gasoline", emoji: "🛥️", type: "marina_fuel" },
+    { name: "Yachting:Lodging (Hotels/Resorts)", emoji: "🏨", type: "travel_hotel" },
+    { name: "Yachting:Airline Tickets", emoji: "✈️", type: "travel_airfare" },
+    { name: "Yachting:Car Rental", emoji: "🚗", type: "travel_car_rental" },
+    { name: "Yachting:Taxis & Rideshare (Uber/Lyft)", emoji: "🚕", type: "travel_other" },
+    { name: "Yachting:Groceries (Costco)", emoji: "🛒", type: "costco" },
+    { name: "Yachting:Groceries (Walmart)", emoji: "🛒", type: "walmart" },
+    { name: "Yachting:Groceries", emoji: "🛒", type: "default" },
+    { name: "Yachting:Restaurants", emoji: "🍽️", type: "dining" },
+    { name: "Yachting:Bars", emoji: "🍻", type: "dining" },
+    { name: "Yachting:Cooffe Shops", emoji: "☕", type: "dining" }
+  ];
 
   // Populate Dropdown
   const select = document.getElementById('category-select');
-  Object.keys(categories).forEach(cat => {
+  allCategories.forEach((cat, index) => {
     const opt = document.createElement('option');
-    opt.value = cat;
-    opt.textContent = `${categories[cat].emoji} ${cat}`;
+    opt.value = index;
+    opt.textContent = `${cat.emoji} ${cat.name}`;
     select.appendChild(opt);
   });
 
   // Handle Selection
   select.addEventListener('change', (e) => {
-    const val = e.target.value;
-    const data = categories[val];
+    const selectedItem = allCategories[e.target.value];
+    const ruleData = rulesMap[selectedItem.type];
     
     document.getElementById('note-area').style.display = 'none';
     document.getElementById('recommendation-area').style.display = 'none';
     
-    if (data.requiresSubChoice) {
+    if (ruleData.requiresSubChoice) {
       document.getElementById('sub-question').style.display = 'block';
     } else {
       document.getElementById('sub-question').style.display = 'none';
-      if (data.note) {
-        document.getElementById('note-area').textContent = data.note;
+      if (ruleData.note) {
+        document.getElementById('note-area').textContent = ruleData.note;
         document.getElementById('note-area').style.display = 'block';
       }
-      renderCards(data.cards);
+      renderCards(ruleData.cards);
     }
   });
 
