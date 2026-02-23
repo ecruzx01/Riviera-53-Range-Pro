@@ -5,128 +5,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>c.Reward Maximizer</title>
     <style>
-        :root { --primary: #0046be; --secondary: #e51937; --bg: #f8f9fa; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        :root { --primary: #0046be; --secondary: #e51937; --bg: #f5f7fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
         .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-        h1 { color: var(--primary); text-align: center; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 15px; }
-        label { font-weight: bold; color: #333; margin-bottom: 10px; display: block; }
-        select { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #cbd5e0; font-size: 16px; margin-bottom: 20px; cursor: pointer; background: #fff; }
-        .res { padding: 20px; border-radius: 12px; margin-bottom: 15px; display: none; }
-        .win { background: #ebf8ff; border-left: 6px solid var(--primary); }
+        h1 { color: var(--primary); text-align: center; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        select { width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #cbd5e0; font-size: 16px; margin-bottom: 25px; background: #fff; cursor: pointer; }
+        .res-card { padding: 20px; border-radius: 12px; margin-bottom: 15px; display: none; }
+        .win { background: #e7f3ff; border-left: 6px solid var(--primary); }
         .run { background: #fff5f5; border-left: 6px solid var(--secondary); }
-        .tag { font-size: 10px; font-weight: 800; padding: 3px 10px; border-radius: 20px; color: white; margin-bottom: 10px; display: inline-block; text-transform: uppercase; }
+        .tag { font-size: 10px; font-weight: bold; padding: 3px 10px; border-radius: 20px; color: white; margin-bottom: 8px; display: inline-block; text-transform: uppercase; }
         .tag-cash { background: #2f855a; }
         .tag-ins { background: #c05621; }
-        .card-name { font-size: 19px; font-weight: 800; color: #2d3748; }
-        .reward { font-size: 17px; font-weight: 700; color: var(--primary); margin: 5px 0; }
-        .desc { font-size: 14px; color: #4a5568; line-height: 1.5; }
+        .card-name { font-size: 18px; font-weight: bold; color: #2d3748; }
+        .reward { font-size: 16px; font-weight: bold; color: var(--primary); margin: 5px 0; }
+        .desc { font-size: 13px; color: #4a5568; line-height: 1.4; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>c.Reward Maximizer</h1>
-    
-    <label>Choose a Category:</label>
-    <select id="sel" onchange="update()">
+    <label style="font-weight:bold; display:block; margin-bottom:10px;">Select Category:</label>
+    <select id="categorySelector" onchange="runMaximizer()">
         <option value="">-- Choose Category --</option>
-        
         <optgroup label="Auto & Transport">
-            <option value="car_ins">Car Insurance (Rental)</option>
+            <option value="car_ins">Car Insurance</option>
             <option value="gas">Gas & Fuel</option>
             <option value="parking">Parking</option>
-            <option value="reg">Registration & Tolls</option>
-            <option value="rideshare">Rideshare (Uber/Lyft)</option>
+            <option value="reg">Registration (Fees & Other)</option>
+            <option value="rideshare">Rideshare</option>
             <option value="parts">Service & Parts</option>
+            <option value="tolls">Tolls</option>
         </optgroup>
-
         <optgroup label="Dining & Drinks">
-            <option value="dining">Restaurants & Bars</option>
+            <option value="bars">Bars</option>
             <option value="coffee">Coffee Shops</option>
             <option value="fastfood">Fast Food</option>
             <option value="delivery">Food Delivery</option>
+            <option value="restaurants">Restaurants</option>
         </optgroup>
-
         <optgroup label="Health & Fitness">
-            <option value="med">Dentist / Doctor / Lab</option>
-            <option value="gym">Gym / Equinox</option>
+            <option value="dentist">Dentist</option>
+            <option value="doctor">Doctor</option>
+            <option value="eyecare">Eyecare</option>
+            <option value="gym">Gym</option>
             <option value="health_ins">Health Insurance</option>
-            <option value="pharmacy">Pharmacy & Vitamins</option>
+            <option value="lab">Laboratory</option>
+            <option value="pharmacy">Pharmacy</option>
+            <option value="vitamins">Vitamins & Supplements</option>
         </optgroup>
-
         <optgroup label="Home">
-            <option value="home_imp">Home Improvement / Repairs</option>
-            <option value="home_ins">Home Insurance</option>
             <option value="furnishings">Furnishings</option>
-            <option value="landscape">Landscape / Services</option>
+            <option value="home_imp">Home Improvement</option>
+            <option value="home_ins">Home Insurance</option>
+            <option value="home_services">Home Services</option>
+            <option value="landscape">Landscape</option>
+            <option value="mortgage">Mortgage</option>
+            <option value="repairs">Repairs & Maintenance</option>
         </optgroup>
-
         <optgroup label="Personal & Family">
-            <option value="groceries_w">Groceries (Walmart)</option>
-            <option value="groceries_c">Groceries (Costco)</option>
-            <option value="edu">Education / Software</option>
-            <option value="ent">Entertainment (Disney/Hulu)</option>
+            <option value="edu">Education: Software</option>
+            <option value="ent">Entertainment</option>
             <option value="gifts">Gifts</option>
+            <option value="groceries">Groceries</option>
         </optgroup>
     </select>
 
-    <div id="wBox" class="res win"></div>
-    <div id="rBox" class="res run"></div>
+    <div id="winner" class="res-card win"></div>
+    <div id="runner" class="res-card run"></div>
 </div>
 
 <script>
-const logic = {
-    // Auto & Transport
-    "car_ins": { w: ["Popular AAdvantage Black", "PRIMARY PROTECTION", "$75,000 Collision/Theft. Decline agency insurance.", "ins"], r: ["Chase Visa Signature", "Secondary Protection", "$60,000 theft/collision coverage.", "ins"] },
-    [span_0](start_span)"gas": { w: ["Costco Anywhere Visa", "4% Cash Back", "First $7,000 per year, then 1%[span_0](end_span)[span_1](start_span).", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Gas category selected with Cash+ status[span_1](end_span).", "cash"] },
-    [span_2](start_span)"parking": { w: ["Costco Anywhere Visa", "3% Cash Back", "Classified as travel purchase worldwide[span_2](end_span)[span_3](start_span).", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_3](end_span).", "cash"] },
-    [span_4](start_span)"reg": { w: ["Costco Anywhere Visa", "3% Cash Back", "Includes tolls and commuter travel worldwide[span_4](end_span)[span_5](start_span).", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_5](end_span).", "cash"] },
-    [span_6](start_span)"rideshare": { w: ["AMEX Schwab Platinum", "$200 Uber Cash", "$15/mo credit + $20 in December.", "ins"], r: ["Costco Anywhere Visa", "3% Cash Back", "Classified as travel[span_6](end_span).", "cash"] },
-    [span_7](start_span)"parts": { w: ["OnePay Mastercard", "1.5% Cash Back", "Best base rate for auto services[span_7](end_span)[span_8](start_span).", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate[span_8](end_span).", "cash"] },
+const db = {
+    // AUTO
+    "car_ins": { win: ["Popular AAdvantage Black", "PRIMARY INSURANCE", "$75k Collision/Theft. Decline agency CDW", "ins"], run: ["Chase Visa", "Secondary Insurance", "$60k coverage", "ins"] },
+    "gas": { win: ["Costco Anywhere Visa", "4% Cash Back", "Up to $7k/yr, then 1%", "cash"], run: ["OnePay Cash", "3% Cash Back", "If Gas category selected + Cash+ status", "cash"] },
+    "parking": { win: ["Costco Anywhere Visa", "3% Cash Back", "Classified as travel", "cash"], run: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards rate", "cash"] },
+    "reg": { win: ["Costco Anywhere Visa", "3% Cash Back", "Includes tolls and commuter travel", "cash"], run: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards rate", "cash"] },
+    "rideshare": { win: ["AMEX Schwab Platinum", "$200 Uber Cash", "$15/mo credit", "ins"], run: ["Costco Anywhere Visa", "3% Cash Back", "Travel category", "cash"] },
+    "parts": { win: ["OnePay Mastercard", "1.5% Cash Back", "Best base rate", "cash"], run: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate", "cash"] },
+    "tolls": { win: ["Costco Anywhere Visa", "3% Cash Back", "Eligible travel purchase", "cash"], run: ["OnePay Mastercard", "1.5% Cash Back", "Base rate", "cash"] },
 
-    // Dining
-    [span_9](start_span)"dining": { w: ["Costco Anywhere Visa", "3% Cash Back", "Restaurants, bars, and lounges worldwide[span_9](end_span)[span_10](start_span).", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Dining selected with Cash+ status[span_10](end_span).", "cash"] },
-    [span_11](start_span)"coffee": { w: ["Costco Anywhere Visa", "3% Cash Back", "Includes cafes and bakeries[span_11](end_span)[span_12](start_span).", "cash"], r: ["OnePay Cash", "3% Cash Back", "If Dining selected with Cash+ status[span_12](end_span).", "cash"] },
-    [span_13](start_span)"fastfood": { w: ["Costco Anywhere Visa", "3% Cash Back", "Includes fast food restaurants[span_13](end_span)[span_14](start_span).", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_14](end_span).", "cash"] },
-    [span_15](start_span)"delivery": { w: ["AMEX Schwab Platinum", "Uber Cash", "Apply monthly $15 credit to Uber Eats.", "ins"], r: ["Costco Anywhere Visa", "3% Cash Back", "If merchant coded as restaurant[span_15](end_span).", "cash"] },
+    // DINING
+    "bars": { win: ["Costco Anywhere Visa", "3% Cash Back", "Includes bars and lounges", "cash"], run: ["OnePay Cash", "3% Cash Back", "If Dining selected + Cash+", "cash"] },
+    "coffee": { win: ["Costco Anywhere Visa", "3% Cash Back", "Includes cafes", "cash"], run: ["OnePay Cash", "3% Cash Back", "If Dining selected + Cash+", "cash"] },
+    "fastfood": { win: ["Costco Anywhere Visa", "3% Cash Back", "Fast food included", "cash"], run: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards", "cash"] },
+    "delivery": { win: ["AMEX Schwab Platinum", "Uber Cash", "Uber Eats compatible", "ins"], run: ["Costco Anywhere Visa", "3% Cash Back", "Coded as restaurant", "cash"] },
+    "restaurants": { win: ["Costco Anywhere Visa", "3% Cash Back", "Worldwide restaurants", "cash"], run: ["OnePay Cash", "3% Cash Back", "With Cash+ status", "cash"] },
 
-    // Health
-    [span_16](start_span)"med": { w: ["Popular AAdvantage Black", "$150,000 Medical", "While traveling outside home country[span_16](end_span)[span_17](start_span).", "ins"], r: ["Popular AAdvantage Black", "$100 Dental", "Per tooth for travel injury[span_17](end_span).", "ins"] },
-    [span_18](start_span)"gym": { w: ["AMEX Schwab Platinum", "$300 Annual Credit", "Statement credit for Equinox/Equinox+.", "ins"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_18](end_span).", "cash"] },
-    [span_19](start_span)"health_ins": { w: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_19](end_span)[span_20](start_span).", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate[span_20](end_span).", "cash"] },
-    [span_21](start_span)"pharmacy": { w: ["Popular AAdvantage Black", "Medical Assistance", "Includes prescription document delivery[span_21](end_span)[span_22](start_span).", "ins"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_22](end_span).", "cash"] },
-
-    // Home
-    [span_23](start_span)"home_imp": { w: ["Chase Visa Signature", "Purchase Protection", "Theft/damage coverage for 120 days[span_23](end_span)[span_24](start_span).", "ins"], r: ["Popular AAdvantage Black", "Extended Warranty", "+1 year coverage (Up to $10k per claim)[span_24](end_span).", "ins"] },
-    [span_25](start_span)"home_ins": { w: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_25](end_span)[span_26](start_span).", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate[span_26](end_span).", "cash"] },
-    [span_27](start_span)"furnishings": { w: ["Chase Visa Signature", "Purchase Protection", "Theft/damage coverage for 120 days[span_27](end_span)[span_28](start_span).", "ins"], r: ["Popular AAdvantage Black", "Extended Warranty", "+1 year coverage (Up to $10k per claim)[span_28](end_span).", "ins"] },
-    [span_29](start_span)"landscape": { w: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_29](end_span)[span_30](start_span).", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate[span_30](end_span).", "cash"] },
-
-    // Personal & Family
-    [span_31](start_span)"groceries_w": { w: ["OnePay Mastercard", "5% Cash Back", "At Walmart with Walmart+ linked[span_31](end_span)[span_32](start_span).", "cash"], r: ["OnePay Mastercard", "3% Cash Back", "Standard Walmart purchase[span_32](end_span).", "cash"] },
-    [span_33](start_span)"groceries_c": { w: ["Costco Anywhere Visa", "2% Cash Back", "Purchases at Costco or Costco.com[span_33](end_span)[span_34](start_span).", "cash"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_34](end_span).", "cash"] },
-    [span_35](start_span)"edu": { w: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_35](end_span)[span_36](start_span).", "cash"], r: ["Costco Anywhere Visa", "1% Cash Back", "Standard base rate[span_36](end_span).", "cash"] },
-    [span_37](start_span)"ent": { w: ["AMEX Schwab Platinum", "$240 Digital Credit", "$20/mo for Disney, Hulu, ESPN+.", "ins"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_37](end_span).", "cash"] },
-    [span_38](start_span)"gifts": { w: ["Chase Visa Signature", "Purchase Protection", "Gifts covered for theft/damage for 120 days[span_38](end_span)[span_39](start_span).", "ins"], r: ["OnePay Mastercard", "1.5% Cash Back", "Standard base rewards rate[span_39](end_span).", "cash"] }
-};
-
-function update() {
-    const val = document.getElementById('sel').value;
-    const w = document.getElementById('wBox');
-    const r = document.getElementById('rBox');
-
-    if (!val || !logic[val]) {
-        w.style.display = 'none'; r.style.display = 'none';
-        return;
-    }
-
-    w.style.display = 'block'; r.style.display = 'block';
-    const entry = logic[val];
-
-    w.innerHTML = `<span class="tag ${entry.w[3] === 'cash' ? 'tag-cash' : 'tag-ins'}">${entry.w[3] === 'cash' ? 'Cash Max' : 'Safety Priority'}</span><div class="card-name">${entry.w[0]}</div><div class="reward">${entry.w[1]}</div><div class="desc">${entry.w[2]}</div>`;
-    r.innerHTML = `<span class="tag ${entry.r[3] === 'cash' ? 'tag-cash' : 'tag-ins'}">${entry.r[3] === 'cash' ? 'Cash Max' : 'Safety Priority'}</span><div class="card-name">${entry.r[0]}</div><div class="reward">${entry.r[1]}</div><div class="desc">${entry.r[2]}</div>`;
-}
-</script>
-
-</body>
-</html>
+    // HEALTH
+    "dentist": { win: ["Popular AAdvantage Black", "$100/Tooth Protection", "Travel injury coverage", "ins"], run: ["Popular AAdvantage Black", "$150k Travel Medical", "Outside home country", "ins"] },
+    "doctor": { win: ["Popular AAdvantage Black", "$150k Travel Medical", "While outside home country", "ins"], run: ["Popular AAdvantage Black", "Medical Referral", "Emergency monitoring", "ins"] },
+    "eyecare": { win: ["OnePay Mastercard", "1.5% Cash Back", "Standard rate", "cash"], run: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate", "cash"] },
+    "gym": { win: ["AMEX Schwab Platinum", "$300 Annual Credit", "Equinox membership", "ins"], run: ["OnePay Mastercard", "1.5% Cash Back", "Base rewards", "cash"] },
+    "health_ins": { win: ["OnePay Mastercard", "1.5% Cash Back", "Standard rate", "cash"], run: ["Costco Anywhere Visa", "1% Cash Back", "Standard rate", "cash"] },
+    "lab": { win: ["Popular AAdvantage Black", "Travel Medical", "Included in medical expenses", "ins"], run: ["OnePay Mastercard", "1.5% Cash Back", "Standard rate", "cash"] },
+    "pharmacy": { win: ["Popular AAdvantage Black", "Prescription Assist", "Delivery of meds abroad", "ins"], run: ["OnePay Mastercard", "1.5% Cash Back", "Standard rate", "cash"] },
+    "vitamins": { win: ["OnePay Mastercard", "1.
+                        
