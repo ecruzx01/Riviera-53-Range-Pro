@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card Maximizer</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .app-container {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 550px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      padding: 30px;
+      box-sizing: border-box;
+      margin: 20px;
+      /* Removed overflow auto so the dropdown can overlay freely */
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    .header img {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 10px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: #0f172a;
+    }
+    
+    /* Custom Searchable Dropdown Styles */
+    .custom-select-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    #category-search {
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      outline: none;
+      background-color: #f8fafc;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    #category-search:focus {
+      border-color: #3b82f6;
+    }
+    .custom-options {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 100;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      margin-top: 4px;
+    }
+    .custom-options.show {
+      display: block;
+    }
+    .option-group {
+      font-weight: 700;
+      padding: 10px 14px;
+      background: #f1f5f9;
+      color: #475569;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .option-item {
+      padding: 12px 14px 12px 24px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .option-item:last-child {
+      border-bottom: none;
+    }
+    .option-item:hover {
+      background: #e2e8f0;
+    }
+    .option-item.hidden, .option-group.hidden {
+      display: none;
+    }
+
+    #sub-question {
+      display: none;
+      background: #eff6ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #3b82f6;
+    }
+    #sub-question p {
+      margin: 0 0 10px 0;
+      font-weight: 600;
+    }
+    .sub-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 8px;
+      background: #fff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .sub-btn:hover {
+      background: #dbeafe;
+    }
+    .recommendation-area {
+      display: none;
+      margin-top: 20px;
+    }
+    .note {
+      font-size: 0.85rem;
+      color: #b45309;
+      background: #fef3c7;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      display: none;
+      line-height: 1.4;
+    }
+    .cc-card {
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .cc-card span {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-top: 4px;
+      font-weight: normal;
+    }
+    
+    /* Card Colors */
+    .bg-costco { background: linear-gradient(135deg, #005f83, #0082b3); }
+    .bg-schwab { background: linear-gradient(135deg, #a6a8ab, #c0c2c4); color: #1e293b; }
+    .bg-bppr { background: linear-gradient(135deg, #e3000f, #ff3333); }
+    .bg-aa { background: linear-gradient(135deg, #2b2b2b, #4b4b4b); }
+    .bg-onepay { background: linear-gradient(135deg, #6366f1, #3b82f6); }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <div class="header">
+    <img src="https://cdn-icons-png.flaticon.com/512/438/438526.png" alt="App Icon">
+    <h1>Card Maximizer</h1>
+  </div>
+
+  <div class="custom-select-wrapper">
+    <input type="text" id="category-search" placeholder="Search or select a category..." autocomplete="off">
+    <div class="custom-options" id="custom-options-list">
+      </div>
+  </div>
+
+  <div id="sub-question">
+    <p>What is your top priority for this rental?</p>
+    <button class="sub-btn" onclick="resolveSub('insurance')">Coverage (Primary Insurance up to 1.5M / $75k)</button>
+    <button class="sub-btn" onclick="resolveSub('discount')">Discounted Rental Rate & Elite Status</button>
+    <button class="sub-btn" onclick="resolveSub('cashback')">Maximize Cash Back</button>
+  </div>
+
+  <div id="note-area" class="note"></div>
+
+  <div class="recommendation-area" id="recommendation-area">
+    <h3 style="margin-top:0; font-size: 1.1rem;">Top 2 Recommended Cards:</h3>
+    <div id="cards-container"></div>
+  </div>
+</div>
+
+<script>
+  const rulesMap = {
+    gas: { cards: [ { name: "Citi Costco Anywhere Visa", perk: "4% cash back (up to $7k/yr)", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat (or 3% if selected as monthly category)", color: "bg-onepay" } ] },
+    dining: { cards: [ { name: "Citi Costco Anywhere Visa", perk: "3% cash back", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat (or 3% if selected as monthly category)", color: "bg-onepay" } ] },
+    travel_airfare: { cards: [ { name: "AMEX Schwab Platinum", perk: "5x points on flights", color: "bg-schwab" }, { name: "Citi AAdvantage Executive", perk: "4x AA miles on American Airlines", color: "bg-aa" } ] },
+    travel_hotel: { cards: [ { name: "AMEX Schwab Platinum", perk: "5x points on prepaid hotels via AmexTravel", color: "bg-schwab" }, { name: "Citi Costco Anywhere Visa", perk: "3% cash back on travel", color: "bg-costco" } ] },
+    travel_other: { cards: [ { name: "Citi Costco Anywhere Visa", perk: "3% cash back on travel", color: "bg-costco" }, { name: "AMEX Schwab Platinum", perk: "1x points (No Foreign Transaction Fees)", color: "bg-schwab" } ] },
+    travel_car_rental: { requiresSubChoice: true },
+    costco: { cards: [ { name: "Citi Costco Anywhere Visa", perk: "2% cash back at Costco", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ] },
+    walmart: { cards: [ { name: "OnePay", perk: "3% to 5% cash back (with Walmart+)", color: "bg-onepay" }, { name: "Citi Costco Anywhere Visa", perk: "1% cash back", color: "bg-costco" } ] },
+    marina_fuel: { note: "⚠️ Important: Marina fuel frequently codes under MCC 5932 (Marinas), which does NOT trigger standard gas station multipliers. A strong flat-rate card is highly recommended here.", cards: [ { name: "OnePay", perk: "1.5% flat cash back on all transactions", color: "bg-onepay" }, { name: "BPPR AAdvantage MC Black", perk: "1x AA mile (Builds loyalty status)", color: "bg-bppr" } ] },
+    marina_fees: { cards: [ { name: "AMEX Schwab Platinum", perk: "No Foreign Transaction Fees", color: "bg-schwab" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ] },
+    default: { cards: [ { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" }, { name: "BPPR AAdvantage MC Black", perk: "1x AA mile on everyday purchases", color: "bg-bppr" } ] }
+  };
+
+  const carRentalSubChoices = {
+    "insurance": [ { name: "BPPR Visa Infinite", perk: "Primary Coverage up to 31 days (Declining CDW/LDW required)", color: "bg-bppr" }, { name: "BPPR AAdvantage MC Black", perk: "MasterRental Primary Coverage up to $75k", color: "bg-bppr" } ],
+    "discount": [ { name: "AMEX Schwab Platinum", perk: "Hertz President's Circle, Avis & National Elite Status", color: "bg-schwab" }, { name: "Citi AAdvantage Executive", perk: "Avis/Budget discounts & up to $120 back", color: "bg-aa" } ],
+    "cashback": [ { name: "Citi Costco Anywhere Visa", perk: "3% cash back on travel & rentals", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ]
+  };
+
+  const allCategories = [
+    { name: "Auto & Transport:Car Insurance", emoji: "🚗", type: "default" },
+    { name: "Auto & Transport:Gas & Fuel", emoji: "⛽", type: "gas" },
+    { name: "Auto & Transport:Parking", emoji: "🅿️", type: "default" },
+    { name: "Auto & Transport:Registration (Other)", emoji: "🚗", type: "default" },
+    { name: "Auto & Transport:Registration Fees", emoji: "🚗", type: "default" },
+    { name: "Auto & Transport:Rideshare", emoji: "🚕", type: "travel_other" },
+    { name: "Auto & Transport:Service & Parts", emoji: "🔧", type: "default" },
+    { name: "Auto & Transport:Tolls", emoji: "🛣️", type: "default" },
+    { name: "Cash & ATM:Cash & ATM", emoji: "🏧", type: "default" },
+    { name: "Dining & Drinks:Bars", emoji: "🍻", type: "dining" },
+    { name: "Dining & Drinks:Coffee Shops", emoji: "☕", type: "dining" },
+    { name: "Dining & Drinks:Dining & Drinks (Other)", emoji: "🍽️", type: "dining" },
+    { name: "Dining & Drinks:Fast Food", emoji: "🍔", type: "dining" },
+    { name: "Dining & Drinks:Food Delivery", emoji: "🥡", type: "dining" },
+    { name: "Dining & Drinks:Restaurants", emoji: "🍽️", type: "dining" },
+    { name: "Education:Software", emoji: "🎓", type: "default" },
+    { name: "Entertainment:Entertainment", emoji: "🎟️", type: "default" },
+    { name: "Fees & Charges:ATM Fee", emoji: "💸", type: "default" },
+    { name: "Fees & Charges:Fees & Charges (Other)", emoji: "💸", type: "default" },
+    { name: "Fees & Charges:Finance Charge", emoji: "💸", type: "default" },
+    { name: "Fees & Charges:Government Payments", emoji: "🏛️", type: "default" },
+    { name: "Fees & Charges:Late Fee", emoji: "💸", type: "default" },
+    { name: "Fees & Charges:Service Fee", emoji: "💸", type: "default" },
+    { name: "Financial:Financial (Other)", emoji: "🏦", type: "default" },
+    { name: "Financial:Financial Advisor", emoji: "📈", type: "default" },
+    { name: "Financial:Life Insurance", emoji: "🛡️", type: "default" },
+    { name: "Fitness:Gym", emoji: "🏋️", type: "default" },
+    { name: "Gifts:Gifts", emoji: "🎁", type: "default" },
+    { name: "Groceries:Groceries", emoji: "🛒", type: "default" },
+    { name: "Health:Dentist", emoji: "🦷", type: "default" },
+    { name: "Health:Doctor", emoji: "👨‍⚕️", type: "default" },
+    { name: "Health:Eyecare", emoji: "👁️", type: "default" },
+    { name: "Health:Health (Other)", emoji: "⚕️", type: "default" },
+    { name: "Health:Health Insurance", emoji: "🛡️", type: "default" },
+    { name: "Health:Laboratory", emoji: "🔬", type: "default" },
+    { name: "Health:Pharmacy", emoji: "💊", type: "default" },
+    { name: "Health:Vitamins & Supplements", emoji: "💊", type: "default" },
+    { name: "Home:Furnishings", emoji: "🛋️", type: "default" },
+    { name: "Home:Home Improvement", emoji: "🔨", type: "default" },
+    { name: "Home:Home Insurance", emoji: "🛡️", type: "default" },
+    { name: "Home:Home Services", emoji: "🧹", type: "default" },
+    { name: "Home:Landscape", emoji: "🌳", type: "default" },
+    { name: "Home:Mortgage", emoji: "🏠", type: "default" },
+    { name: "Home:Repairs & Maintenance", emoji: "🔧", type: "default" },
+    { name: "Kids:Allowance", emoji: "👶", type: "default" },
+    { name: "Kids:Baby Supplies", emoji: "🍼", type: "default" },
+    { name: "Kids:Kids Health Insurance", emoji: "🛡️", type: "default" },
+    { name: "Legal:Lawyer Fees", emoji: "⚖️", type: "default" },
+    { name: "Legal:Legal (Other)", emoji: "⚖️", type: "default" },
+    { name: "Legal:Parents Allowence", emoji: "👵", type: "default" },
+    { name: "Loans:Loans", emoji: "💳", type: "default" },
+    { name: "Office:Generator Fuel", emoji: "⛽", type: "gas" },
+    { name: "Office:Generator Maintenance", emoji: "🔧", type: "default" },
+    { name: "Office:Office Music", emoji: "🎵", type: "default" },
+    { name: "Office:Programs & Software", emoji: "💻", type: "default" },
+    { name: "Office:Software Subscription", emoji: "💻", type: "default" },
+    { name: "Personal Care:Hair", emoji: "💇", type: "default" },
+    { name: "Personal Care:Personal Care (Other)", emoji: "💆", type: "default" },
+    { name: "Personal Care:Shallowness", emoji: "💅", type: "default" },
+    { name: "Personal Care:Spa", emoji: "🧖", type: "default" },
+    { name: "Pets:Pet Food & Supplies", emoji: "🐾", type: "default" },
+    { name: "Pets:Pets (Other)", emoji: "🐾", type: "default" },
+    { name: "Pets:Veterinary", emoji: "🩺", type: "default" },
+    { name: "Shopping:Clothing", emoji: "👕", type: "default" },
+    { name: "Shopping:Electronics", emoji: "💻", type: "default" },
+    { name: "Shopping:Hobbies", emoji: "🎨", type: "default" },
+    { name: "Shopping:Jewelry", emoji: "💍", type: "default" },
+    { name: "Shopping:Shipping", emoji: "📦", type: "default" },
+    { name: "Shopping:Shopping (Other)", emoji: "🛍️", type: "default" },
+    { name: "Subscriptions:Subscriptions", emoji: "📅", type: "default" },
+    { name: "Taxes:Local Tax", emoji: "🧾", type: "default" },
+    { name: "Taxes:Property Tax", emoji: "🧾", type: "default" },
+    { name: "Taxes:State Tax", emoji: "🧾", type: "default" },
+    { name: "Taxes:Taxes (Other)", emoji: "🧾", type: "default" },
+    { name: "Travel:Airfare", emoji: "✈️", type: "travel_airfare" },
+    { name: "Travel:Baggage Fee", emoji: "🧳", type: "travel_other" },
+    { name: "Travel:Car Rental", emoji: "🚗", type: "travel_car_rental" },
+    { name: "Travel:Car Rental Fuel", emoji: "⛽", type: "gas" },
+    { name: "Travel:Excursions & Tours", emoji: "🗺️", type: "travel_other" },
+    { name: "Travel:Hotels & Lodging", emoji: "🏨", type: "travel_hotel" },
+    { name: "Travel:Restaurants - T", emoji: "🍽️", type: "dining" },
+    { name: "Travel:Taxi - T", emoji: "🚕", type: "travel_other" },
+    { name: "Travel:Travel (Other)", emoji: "🧳", type: "travel_other" },
+    { name: "Utilities:Cable TV", emoji: "📺", type: "default" },
+    { name: "Utilities:Cellular Service", emoji: "📱", type: "default" },
+    { name: "Utilities:Electricity", emoji: "💡", type: "default" },
+    { name: "Utilities:Internet", emoji: "🌐", type: "default" },
+    { name: "Utilities:Water", emoji: "💧", type: "default" },
+    { name: "Yachting:Port Entry & Customs Fees", emoji: "🛂", type: "marina_fees" },
+    { name: "Yachting:Marina Slip Fees", emoji: "⚓", type: "marina_fees" },
+    { name: "Yachting:Diesel & Gasoline", emoji: "🛥️", type: "marina_fuel" },
+    { name: "Yachting:Lodging (Hotels/Resorts)", emoji: "🏨", type: "travel_hotel" },
+    { name: "Yachting:Groceries (Costco)", emoji: "🛒", type: "costco" },
+    { name: "Yachting:Restaurants", emoji: "🍽️", type: "dining" }
+  ];
+
+  // Logic to parse and group categories
+  const groupedCategories = {};
+  allCategories.forEach((cat, index) => {
+    // Split "Category:Item" format
+    let parts = cat.name.split(':');
+    let group = parts[0].trim();
+    let item = parts.length > 1 ? parts.slice(1).join(':').trim() : group;
+    
+    if (!groupedCategories[group]) {
+      groupedCategories[group] = [];
+    }
+    groupedCategories[group].push({ ...cat, cleanName: item, originalIndex: index });
+  });
+
+  const searchInput = document.getElementById('category-search');
+  const optionsList = document.getElementById('custom-options-list');
+
+  // Build the custom dropdown HTML
+  Object.keys(groupedCategories).forEach(groupName => {
+    // Group Header
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'option-group';
+    groupDiv.textContent = groupName;
+    optionsList.appendChild(groupDiv);
+    
+    // Group Items
+    groupedCategories[groupName].forEach(item => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'option-item';
+      itemDiv.innerHTML = `${item.emoji} ${item.cleanName}`;
+      itemDiv.dataset.index = item.originalIndex;
+      // Store a search string combining group and item for robust filtering
+      itemDiv.dataset.search = `${groupName} ${item.cleanName}`.toLowerCase();
+      
+      itemDiv.addEventListener('click', () => {
+        searchInput.value = `${item.emoji} ${item.cleanName}`;
+        optionsList.classList.remove('show');
+        handleSelection(item.originalIndex);
+      });
+      
+      optionsList.appendChild(itemDiv);
+    });
+  });
+
+  // Search / Filter Logic
+  searchInput.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase();
+    let currentGroup = null;
+    let groupHasVisibleItems = false;
+    
+    Array.from(optionsList.children).forEach(el => {
+      if (el.classList.contains('option-group')) {
+        // If the previous group had no visible items, hide its header
+        if (currentGroup && !groupHasVisibleItems) {
+          currentGroup.classList.add('hidden');
+        }
+        currentGroup = el;
+        groupHasVisibleItems = false;
+        el.classList.remove('hidden'); // Show initially, check items next
+      } else if (el.classList.contains('option-item')) {
+        if (el.dataset.search.includes(term)) {
+          el.classList.remove('hidden');
+          groupHasVisibleItems = true;
+        } else {
+          el.classList.add('hidden');
+        }
+      }
+    });
+    
+    // Check the very last group in the loop
+    if (currentGroup && !groupHasVisibleItems) {
+      currentGroup.classList.add('hidden');
+    }
+  });
+
+  // UI Interactivity for Custom Dropdown
+  searchInput.addEventListener('focus', () => {
+    optionsList.classList.add('show');
+    searchInput.value = ''; // clear on focus to make searching easy
+    // trigger input event to reset list view
+    searchInput.dispatchEvent(new Event('input')); 
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.custom-select-wrapper')) {
+      optionsList.classList.remove('show');
+    }
+  });
+
+  // Handle Logic once an item is clicked
+  function handleSelection(index) {
+    const selectedItem = allCategories[index];
+    const ruleData = rulesMap[selectedItem.type] || rulesMap['default'];
+    
+    document.getElementById('note-area').style.display = 'none';
+    document.getElementById('recommendation-area').style.display = 'none';
+    
+    if (ruleData.requiresSubChoice) {
+      document.getElementById('sub-question').style.display = 'block';
+    } else {
+      document.getElementById('sub-question').style.display = 'none';
+      if (ruleData.note) {
+        document.getElementById('note-area').textContent = ruleData.note;
+        document.getElementById('note-area').style.display = 'block';
+      }
+      renderCards(ruleData.cards);
+    }
+  }
+
+  function resolveSub(choice) {
+    document.getElementById('sub-question').style.display = 'none';
+    renderCards(carRentalSubChoices[choice]);
+  }
+
+  function renderCards(cards) {
+    const container = document.getElementById('cards-container');
+    container.innerHTML = '';
+    cards.forEach(c => {
+      const div = document.createElement('div');
+      div.className = `cc-card ${c.color}`;
+      div.innerHTML = `${c.name} <span>${c.perk}</span>`;
+      container.appendChild(div);
+    });
+    document.getElementById('recommendation-area').style.display = 'block';
+  }
+
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('Service Worker Registered'))
+      .catch(err => console.error('Service Worker Registration Failed:', err));
+  }
+</scr
