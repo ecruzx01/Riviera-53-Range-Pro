@@ -157,6 +157,8 @@
     .bg-bppr { background: linear-gradient(135deg, #e3000f, #ff3333); }
     .bg-aa { background: linear-gradient(135deg, #2b2b2b, #4b4b4b); }
     .bg-onepay { background: linear-gradient(135deg, #6366f1, #3b82f6); }
+    .bg-amazon { background: linear-gradient(135deg, #1c2938, #37475a); }
+    .bg-cashplus { background: linear-gradient(135deg, #0033a0, #001a57); }
   </style>
 </head>
 <body>
@@ -189,6 +191,12 @@
 
 <script>
   const rulesMap = {
+    utilities: { note: "Quarterly 5% categories cap at $2,000.", cards: [ { name: "U.S. Bank Cash+", perk: "5% (capped) + 1% thereafter", color: "bg-cashplus" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ] },
+    gym: { cards: [ { name: "U.S. Bank Cash+", perk: "5% cash back (if selected)", color: "bg-cashplus" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ] },
+    electronics: { cards: [ { name: "U.S. Bank Cash+", perk: "5% cash back (if selected)", color: "bg-cashplus" }, { name: "Amazon Prime Visa", perk: "5% (if buying on Amazon)", color: "bg-amazon" } ] },
+    sporting_goods: { cards: [ { name: "U.S. Bank Cash+", perk: "5% cash back (if selected)", color: "bg-cashplus" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ] },
+    groceries: { cards: [ { name: "U.S. Bank Cash+", perk: "2% cash back (if selected)", color: "bg-cashplus" }, { name: "OnePay", perk: "1.5% flat cash back", color: "bg-onepay" } ] },
+    fast_food: { cards: [ { name: "U.S. Bank Cash+", perk: "5% cash back (if selected)", color: "bg-cashplus" }, { name: "Citi Costco Anywhere Visa", perk: "3% cash back", color: "bg-costco" } ] },
     gas: { cards: [ { name: "Citi Costco Anywhere Visa", perk: "4% cash back (up to $7k/yr)", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat (or 3% if selected as monthly category)", color: "bg-onepay" } ] },
     dining: { cards: [ { name: "Citi Costco Anywhere Visa", perk: "3% cash back", color: "bg-costco" }, { name: "OnePay", perk: "1.5% flat (or 3% if selected as monthly category)", color: "bg-onepay" } ] },
     travel_airfare: { cards: [ { name: "AMEX Schwab Platinum", perk: "5x points on flights", color: "bg-schwab" }, { name: "Citi AAdvantage Executive", perk: "4x AA miles on American Airlines", color: "bg-aa" } ] },
@@ -221,7 +229,7 @@
     { name: "Dining & Drinks:Bars", emoji: "🍻", type: "dining" },
     { name: "Dining & Drinks:Coffee Shops", emoji: "☕", type: "dining" },
     { name: "Dining & Drinks:Dining & Drinks (Other)", emoji: "🍽️", type: "dining" },
-    { name: "Dining & Drinks:Fast Food", emoji: "🍔", type: "dining" },
+    { name: "Dining & Drinks:Fast Food", emoji: "🍔", type: "fast_food" },
     { name: "Dining & Drinks:Food Delivery", emoji: "🥡", type: "dining" },
     { name: "Dining & Drinks:Restaurants", emoji: "🍽️", type: "dining" },
     { name: "Education:Software", emoji: "🎓", type: "default" },
@@ -235,9 +243,9 @@
     { name: "Financial:Financial (Other)", emoji: "🏦", type: "default" },
     { name: "Financial:Financial Advisor", emoji: "📈", type: "default" },
     { name: "Financial:Life Insurance", emoji: "🛡️", type: "default" },
-    { name: "Fitness:Gym", emoji: "🏋️", type: "default" },
+    { name: "Fitness:Gym", emoji: "🏋️", type: "gym" },
     { name: "Gifts:Gifts", emoji: "🎁", type: "default" },
-    { name: "Groceries:Groceries", emoji: "🛒", type: "default" },
+    { name: "Groceries:Groceries", emoji: "🛒", type: "groceries" },
     { name: "Health:Dentist", emoji: "🦷", type: "default" },
     { name: "Health:Doctor", emoji: "👨‍⚕️", type: "default" },
     { name: "Health:Eyecare", emoji: "👁️", type: "default" },
@@ -264,7 +272,7 @@
     { name: "Office:Generator Maintenance", emoji: "🔧", type: "default" },
     { name: "Office:Office Music", emoji: "🎵", type: "default" },
     { name: "Office:Programs & Software", emoji: "💻", type: "default" },
-    { name: "Office:Software Subscription", emoji: "💻", type: "default" },
+    { name: "Office:Software Subscription", emoji: "💻", type: "utilities" },
     { name: "Personal Care:Hair", emoji: "💇", type: "default" },
     { name: "Personal Care:Personal Care (Other)", emoji: "💆", type: "default" },
     { name: "Personal Care:Shallowness", emoji: "💅", type: "default" },
@@ -273,12 +281,12 @@
     { name: "Pets:Pets (Other)", emoji: "🐾", type: "default" },
     { name: "Pets:Veterinary", emoji: "🩺", type: "default" },
     { name: "Shopping:Clothing", emoji: "👕", type: "default" },
-    { name: "Shopping:Electronics", emoji: "💻", type: "default" },
-    { name: "Shopping:Hobbies", emoji: "🎨", type: "default" },
+    { name: "Shopping:Electronics", emoji: "💻", type: "electronics" },
+    { name: "Shopping:Hobbies", emoji: "🎨", type: "sporting_goods" },
     { name: "Shopping:Jewelry", emoji: "💍", type: "default" },
     { name: "Shopping:Shipping", emoji: "📦", type: "default" },
     { name: "Shopping:Shopping (Other)", emoji: "🛍️", type: "default" },
-    { name: "Subscriptions:Subscriptions", emoji: "📅", type: "default" },
+    { name: "Subscriptions:Subscriptions", emoji: "📅", type: "utilities" },
     { name: "Taxes:Local Tax", emoji: "🧾", type: "default" },
     { name: "Taxes:Property Tax", emoji: "🧾", type: "default" },
     { name: "Taxes:State Tax", emoji: "🧾", type: "default" },
@@ -292,11 +300,11 @@
     { name: "Travel:Restaurants - T", emoji: "🍽️", type: "dining" },
     { name: "Travel:Taxi - T", emoji: "🚕", type: "travel_other" },
     { name: "Travel:Travel (Other)", emoji: "🧳", type: "travel_other" },
-    { name: "Utilities:Cable TV", emoji: "📺", type: "default" },
-    { name: "Utilities:Cellular Service", emoji: "📱", type: "default" },
-    { name: "Utilities:Electricity", emoji: "💡", type: "default" },
-    { name: "Utilities:Internet", emoji: "🌐", type: "default" },
-    { name: "Utilities:Water", emoji: "💧", type: "default" },
+    { name: "Utilities:Cable TV", emoji: "📺", type: "utilities" },
+    { name: "Utilities:Cellular Service", emoji: "📱", type: "utilities" },
+    { name: "Utilities:Electricity", emoji: "💡", type: "utilities" },
+    { name: "Utilities:Internet", emoji: "🌐", type: "utilities" },
+    { name: "Utilities:Water", emoji: "💧", type: "utilities" },
     { name: "Yachting:Port Entry & Customs Fees", emoji: "🛂", type: "marina_fees" },
     { name: "Yachting:Marina Slip Fees", emoji: "⚓", type: "marina_fees" },
     { name: "Yachting:Diesel & Gasoline", emoji: "🛥️", type: "marina_fuel" },
@@ -308,7 +316,6 @@
   const searchInput = document.getElementById('category-search');
   const optionsList = document.getElementById('custom-options-list');
 
-  // Parse and group categories cleanly
   const groupedCategories = {};
   allCategories.forEach((cat, index) => {
     let parts = cat.name.split(':');
@@ -319,7 +326,6 @@
     groupedCategories[group].push({ ...cat, cleanName: item, originalIndex: index });
   });
 
-  // Build the HTML list
   optionsList.innerHTML = '';
   Object.keys(groupedCategories).forEach(groupName => {
     const groupDiv = document.createElement('div');
@@ -343,7 +349,6 @@
     });
   });
 
-  // Hardened Search Logic
   function filterOptions(term) {
     term = term.toLowerCase();
     let currentGroup = null;
@@ -367,13 +372,11 @@
       }
     });
     
-    // Check final group
     if (currentGroup) {
       currentGroup.style.display = groupHasVisibleItems ? 'block' : 'none';
     }
   }
 
-  // Event Listeners for smooth interacting
   searchInput.addEventListener('input', (e) => filterOptions(e.target.value));
 
   searchInput.addEventListener('click', (e) => {
@@ -388,7 +391,6 @@
     }
   });
 
-  // Render logic
   function handleSelection(index) {
     const selectedItem = allCategories[index];
     const ruleData = rulesMap[selectedItem.type] || rulesMap['default'];
@@ -425,7 +427,6 @@
     document.getElementById('recommendation-area').style.display = 'block';
   }
 
-  // Register Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
       .catch(err => console.error('Service Worker Registration Failed:', err));
